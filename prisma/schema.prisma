@@ -1,0 +1,453 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  RESIDENT
+  STAFF
+  ADMIN
+}
+
+enum UserStatus {
+  PENDING_VERIFICATION
+  ACTIVE
+  SUSPENDED
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum CivilStatus {
+  SINGLE
+  MARRIED
+  WIDOWED
+  SEPARATED
+}
+
+enum VerificationStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum DocumentType {
+  BARANGAY_CLEARANCE
+  CERTIFICATE_OF_RESIDENCY
+  CERTIFICATE_OF_INDIGENCY
+  BUSINESS_CLEARANCE
+}
+
+enum RequestStatus {
+  PENDING
+  REVIEWING
+  APPROVED
+  RELEASED
+  REJECTED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+}
+
+enum ComplaintStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+}
+
+enum ComplaintCategory {
+  NOISE
+  WASTE
+  STREETLIGHT
+  DISTURBANCE
+  INFRASTRUCTURE
+  OTHER
+}
+
+enum AnnouncementPriority {
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum AchievementCategory {
+  AWARD
+  CERTIFICATE
+  RECOGNITION
+  SEAL
+  OTHER
+}
+
+enum InventoryCategory {
+  FURNITURE
+  EVENT
+  AUDIO_VISUAL
+  VEHICLE
+  COMMUNICATION
+  DISASTER
+  SPORTS
+  OFFICE
+  OTHER
+}
+
+enum InventoryCondition {
+  GOOD
+  FAIR
+  NEEDS_REPAIR
+  UNUSABLE
+}
+
+enum BudgetCategory {
+  PERSONAL_SERVICES
+  MOOE
+  CAPITAL_OUTLAY
+  SK_FUND
+  GAD
+  CALAMITY
+  DEVELOPMENT
+  PEACE_AND_ORDER
+  HEALTH
+  OTHER
+}
+
+enum OfficialRole {
+  PUNONG_BARANGAY
+  BARANGAY_KAGAWAD
+  SECRETARY
+  TREASURER
+  SK_CHAIRPERSON
+  SK_KAGAWAD
+  TANOD
+  HEALTH_WORKER
+  OTHER
+}
+
+enum HouseholdRelation {
+  MEMBER
+  BOARDER
+}
+
+enum ResidencyStatus {
+  ACTIVE
+  MOVED_OUT
+}
+
+enum LifeStatus {
+  ALIVE
+  DECEASED
+}
+
+model User {
+  id                 String     @id @default(cuid())
+  email              String     @unique
+  passwordHash       String
+  role               Role
+  status             UserStatus @default(PENDING_VERIFICATION)
+  sessionVersion     Int        @default(0)
+  failedLoginCount   Int        @default(0)
+  lockedUntil        DateTime?
+  mustChangePassword Boolean    @default(false)
+  lastLoginAt        DateTime?
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  resident           Resident?
+  documentRequests   DocumentRequest[] @relation("RequestedBy")
+  processedRequests  DocumentRequest[] @relation("ProcessedBy")
+  issuedCertificates Certificate[]     @relation("IssuedBy")
+  complaints         Complaint[]       @relation("ReportedBy")
+  assignedComplaints Complaint[]       @relation("AssignedTo")
+  announcements      Announcement[]
+  achievements       Achievement[]
+  inventoryItems     InventoryItem[]
+  officials          BarangayOfficial[]
+  budgetLines        BudgetLine[]
+  budgetExpenses     BudgetExpense[]
+  auditLogs          AuditLog[]
+  verifiedResidents  Resident[]        @relation("VerifiedBy")
+}
+
+model Household {
+  id              String   @id @default(cuid())
+  householdNumber String   @unique
+  purok           String
+  streetAddress   String
+  headResidentId  String?  @unique
+  dateRegistered  DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  head    Resident?  @relation("HouseholdHead", fields: [headResidentId], references: [id])
+  members Resident[] @relation("HouseholdMembers")
+}
+
+model Resident {
+  id                 String             @id @default(cuid())
+  userId             String?            @unique
+  householdId        String
+  firstName          String
+  middleName         String?
+  lastName           String
+  suffix             String?
+  birthdate          DateTime
+  gender             Gender
+  civilStatus        CivilStatus
+  contactNumber      String?
+  isSenior           Boolean            @default(false)
+  isPwd              Boolean            @default(false)
+  isSoloParent       Boolean            @default(false)
+  isRegisteredVoter  Boolean            @default(false)
+  isSkVoter          Boolean            @default(false)
+  lifeStatus         LifeStatus         @default(ALIVE)
+  deceasedAt         DateTime?
+  deathNote          String?
+  verificationStatus VerificationStatus @default(UNVERIFIED)
+  verifiedById       String?
+  verifiedAt         DateTime?
+  rejectionReason    String?
+  photoPath          String?
+  idDocumentPath     String?
+  qrPublicId         String             @unique @default(uuid())
+  remarks            String?
+  privacyConsentAt   DateTime?
+  relation           HouseholdRelation  @default(MEMBER)
+  residencyStatus    ResidencyStatus    @default(ACTIVE)
+  movedOutAt         DateTime?
+  movedOutNote       String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  user             User?              @relation(fields: [userId], references: [id])
+  household        Household          @relation("HouseholdMembers", fields: [householdId], references: [id])
+  headedHousehold  Household?         @relation("HouseholdHead")
+  verifiedBy       User?              @relation("VerifiedBy", fields: [verifiedById], references: [id])
+  documentRequests DocumentRequest[]
+
+  @@index([lastName, firstName])
+  @@index([verificationStatus])
+  @@index([residencyStatus])
+  @@index([lifeStatus])
+}
+
+model DocumentRequest {
+  id                String         @id @default(cuid())
+  type              DocumentType
+  status            RequestStatus  @default(PENDING)
+  purpose           String
+  subjectResidentId String
+  requestedByUserId String
+  businessName      String?
+  businessAddress   String?
+  businessNature    String?
+  indigencyNote     String?
+  feeAmount         Decimal        @db.Decimal(10, 2)
+  paymentStatus     PaymentStatus  @default(UNPAID)
+  controlNumber     String?        @unique
+  rejectionReason   String?
+  staffNotes        String?
+  processedById     String?
+  releasedAt        DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  subject     Resident       @relation(fields: [subjectResidentId], references: [id])
+  requestedBy User           @relation("RequestedBy", fields: [requestedByUserId], references: [id])
+  processedBy User?          @relation("ProcessedBy", fields: [processedById], references: [id])
+  certificate Certificate?
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Certificate {
+  id                String   @id @default(cuid())
+  documentRequestId String   @unique
+  verifyToken       String   @unique
+  pdfPath           String
+  validUntil        DateTime
+  issuedById        String
+  issuedAt          DateTime @default(now())
+
+  documentRequest DocumentRequest @relation(fields: [documentRequestId], references: [id])
+  issuedBy        User            @relation("IssuedBy", fields: [issuedById], references: [id])
+}
+
+model Complaint {
+  id              String            @id @default(cuid())
+  category        ComplaintCategory
+  description     String
+  location        String
+  photoPaths      String[]
+  status          ComplaintStatus   @default(NEW)
+  reportedById    String
+  assignedToId    String?
+  resolutionNotes String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  reportedBy User  @relation("ReportedBy", fields: [reportedById], references: [id])
+  assignedTo User? @relation("AssignedTo", fields: [assignedToId], references: [id])
+
+  @@index([status])
+}
+
+model Announcement {
+  id          String               @id @default(cuid())
+  title       String
+  content     String
+  coverPath   String?
+  priority    AnnouncementPriority @default(NORMAL)
+  publishedAt DateTime?
+  expiresAt   DateTime?
+  createdById String
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  createdBy User @relation(fields: [createdById], references: [id])
+}
+
+model Achievement {
+  id          String              @id @default(cuid())
+  title       String
+  description String
+  imagePath   String?
+  category    AchievementCategory @default(AWARD)
+  awardedBy   String?
+  awardedAt   DateTime
+  publishedAt DateTime?
+  createdById String
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  createdBy User @relation(fields: [createdById], references: [id])
+
+  @@index([awardedAt])
+}
+
+model InventoryItem {
+  id             String             @id @default(cuid())
+  name           String
+  category       InventoryCategory  @default(OTHER)
+  quantity       Int                @default(1)
+  quantityOut    Int                @default(0)
+  condition      InventoryCondition @default(GOOD)
+  location       String?
+  propertyNumber String?
+  notes          String?
+  createdById    String
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  createdBy User @relation(fields: [createdById], references: [id])
+
+  @@index([category])
+}
+
+model BarangayOfficial {
+  id            String       @id @default(cuid())
+  name          String
+  role          OfficialRole
+  committee     String?
+  photoPath     String?
+  contactNumber String?
+  sortOrder     Int          @default(0)
+  published     Boolean      @default(true)
+  createdById   String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  createdBy User @relation(fields: [createdById], references: [id])
+
+  @@index([role, sortOrder])
+}
+
+model BudgetLine {
+  id          String         @id @default(cuid())
+  year        Int
+  category    BudgetCategory
+  title       String
+  allocated   Decimal        @db.Decimal(14, 2)
+  notes       String?
+  createdById String
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  createdBy User            @relation(fields: [createdById], references: [id])
+  expenses  BudgetExpense[]
+
+  @@index([year, category])
+}
+
+model BudgetExpense {
+  id          String   @id @default(cuid())
+  lineId      String
+  spentAt     DateTime
+  amount      Decimal  @db.Decimal(14, 2)
+  payee       String?
+  description String
+  referenceNo String?
+  receiptPath String?
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  line      BudgetLine @relation(fields: [lineId], references: [id], onDelete: Cascade)
+  createdBy User       @relation(fields: [createdById], references: [id])
+
+  @@index([lineId])
+  @@index([spentAt])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  actor User? @relation(fields: [actorId], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+model Settings {
+  id                     String   @id @default("default")
+  barangayName           String
+  cityMunicipality       String
+  province               String
+  address                String
+  contactNumber          String?
+  captainName            String
+  secretaryName          String
+  logoPath               String?
+  sealPath               String?
+  captainSignaturePath   String?
+  secretarySignaturePath String?
+  clearanceFee           Decimal  @db.Decimal(10, 2)
+  residencyFee           Decimal  @db.Decimal(10, 2)
+  indigencyFee           Decimal  @db.Decimal(10, 2)
+  businessClearanceFee   Decimal  @db.Decimal(10, 2)
+  certificateValidityDays Int     @default(180)
+  updatedAt              DateTime @updatedAt
+}
+
+model ControlCounter {
+  year Int
+  type DocumentType
+  last Int
+
+  @@id([year, type])
+}
