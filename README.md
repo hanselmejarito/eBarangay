@@ -1,15 +1,21 @@
 # eBarangay
 
-Single-barangay digital services: household registry, verified resident accounts, official certificates, complaints, announcements, and signed QR IDs.
+Single-barangay digital hall: household registry, verified resident accounts, official certificates, complaints, announcements, budget transparency, and signed QR IDs.
 
-This is hall software, not a multi-LGU platform. A barangay resolution, official seal, hosting, and `pg_dump` backups are still required before real use. Katarungang Pambarangay / blotter, SMS, and GCash are out of scope for v1.
+This is hall software, not a multi-LGU platform. A barangay resolution, official seal, hosting, and `pg_dump` backups are still required before real use.
+
+| | |
+|---|---|
+| **Author** | Hansel Mejarito Jr. |
+| **Live demo** | [https://e-barangay-ph.vercel.app](https://e-barangay-ph.vercel.app) |
+| **Documentation** | [docs/DOCUMENTATION.md](docs/DOCUMENTATION.md) |
 
 ## Stack
 
-- Next.js (App Router) · React · TypeScript · Tailwind CSS · shadcn/ui
-- PostgreSQL · Prisma
+- Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · shadcn/ui
+- PostgreSQL · Prisma 6
 - Auth.js v5 (credentials + JWT with `sessionVersion` revocation)
-- Zod · Server Actions · pdf-lib · QR (HMAC-signed)
+- Zod · Server Actions · pdf-lib · HMAC-signed QR · Recharts
 
 ## Setup
 
@@ -19,7 +25,7 @@ This is hall software, not a multi-LGU platform. A barangay resolution, official
 cp .env.example .env
 ```
 
-Generate `AUTH_SECRET` (`openssl rand -base64 32`).
+Generate `AUTH_SECRET` (`openssl rand -base64 32`). Keep `AUTH_URL=http://localhost:3000`.
 
 2. Start PostgreSQL:
 
@@ -41,6 +47,8 @@ npm run db:seed
 npm run dev
 ```
 
+Open [http://localhost:3000](http://localhost:3000). Full setup, roles, modules, email, and Vercel notes: **[Documentation](docs/DOCUMENTATION.md)**.
+
 ## Demo accounts
 
 | Role     | Email                     | Password      |
@@ -53,7 +61,7 @@ npm run dev
 ## Roles
 
 - **Resident** — register, request documents for household members, complaints, QR ID after verification
-- **Staff** — verify residents, process requests, complaints, announcements
+- **Staff** — verify residents, process requests, complaints, announcements, inventory, budget, reports
 - **Admin** — everything staff can do, plus users, settings, and audit log
 
 Staff accounts are created by an admin. Residents self-register and wait in the verification queue.
