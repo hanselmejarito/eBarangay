@@ -146,6 +146,12 @@ enum LifeStatus {
   DECEASED
 }
 
+enum NoticeChannelStatus {
+  SENT
+  RECORDED
+  SKIPPED
+}
+
 model User {
   id                 String     @id @default(cuid())
   email              String     @unique
@@ -230,7 +236,8 @@ model Resident {
   household        Household          @relation("HouseholdMembers", fields: [householdId], references: [id])
   headedHousehold  Household?         @relation("HouseholdHead")
   verifiedBy       User?              @relation("VerifiedBy", fields: [verifiedById], references: [id])
-  documentRequests DocumentRequest[]
+  documentRequests     DocumentRequest[]
+  announcementNotices  AnnouncementNotice[]
 
   @@index([lastName, firstName])
   @@index([verificationStatus])
@@ -313,6 +320,25 @@ model Announcement {
   updatedAt   DateTime             @updatedAt
 
   createdBy User @relation(fields: [createdById], references: [id])
+  notices   AnnouncementNotice[]
+}
+
+model AnnouncementNotice {
+  id             String              @id @default(cuid())
+  announcementId String
+  residentId     String
+  email          String?
+  mobile         String?
+  emailStatus    NoticeChannelStatus
+  smsStatus      NoticeChannelStatus
+  readAt         DateTime?
+  createdAt      DateTime            @default(now())
+
+  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  resident     Resident     @relation(fields: [residentId], references: [id], onDelete: Cascade)
+
+  @@unique([announcementId, residentId])
+  @@index([residentId, readAt])
 }
 
 model Achievement {

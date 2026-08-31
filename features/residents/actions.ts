@@ -1,20 +1,17 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { writeAudit } from "@/lib/audit";
 import { saveUpload } from "@/lib/files";
 import { residentSchema } from "@/lib/validations";
-import { requireStaff } from "@/lib/rbac";
+import { requireStaff, requireUser } from "@/lib/rbac";
 import { setResidentVoterFlags } from "@/lib/resident-sql";
 import type { ActionState } from "@/features/auth/actions";
 
-export async function createResidentAction(
-  _prev: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
-  const staff = await requireStaff();
-  const parsed = residentSchema.safeParse({
+function residentFormData(formData: FormData) {
+  return {
     firstName: formData.get("firstName"),
     middleName: formData.get("middleName") || undefined,
     lastName: formData.get("lastName"),
@@ -31,7 +28,32 @@ export async function createResidentAction(
     isSkVoter: formData.get("isSkVoter") === "on",
     remarks: formData.get("remarks") || undefined,
     relation: formData.get("relation") || "MEMBER",
+    email: String(formData.get("email") ?? "").trim() || undefined,
+    password: String(formData.get("password") ?? "").trim() || undefined,
+  };
+}
+
+async function createPortalUser(email: string, password: string) {
+  const exists = await prisma.user.findUnique({ where: { email } });
+  if (exists) return { error: "Email already in use." as const };
+  const user = await prisma.user.create({
+    data: {
+      email,
+      passwordHash: await bcrypt.hash(password, 10),
+      role: "RESIDENT",
+      status: "ACTIVE",
+      mustChangePassword: true,
+    },
   });
+  return { user };
+}
+
+export async function createResidentAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const staff = await requireStaff();
+  const parsed = residentSchema.safeParse(residentFormData(formData));
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid resident" };
   }
@@ -42,7 +64,22 @@ export async function createResidentAction(
     photoPath = await saveUpload(photo, "photos");
   }
 
-  const { relation, isRegisteredVoter, isSkVoter, ...residentFields } = parsed.data;
+  const {
+    relation,
+    isRegisteredVoter,
+    isSkVoter,
+    email,
+    password,
+    ...residentFields
+  } = parsed.data;
+
+  let userId: string | undefined;
+  if (email && password) {
+    const created = await createPortalUser(email.toLowerCase(), password);
+    if ("error" in created && created.error) return { error: created.error };
+    if ("user" in created) userId = created.user.id;
+  }
+
   const resident = await prisma.resident.create({
     data: {
       ...residentFields,
@@ -54,6 +91,7 @@ export async function createResidentAction(
       verifiedById: staff.id,
       verifiedAt: new Date(),
       photoPath,
+      userId,
     },
   });
   const rel = relation === "BOARDER" ? "BOARDER" : "MEMBER";
@@ -74,7 +112,11 @@ export async function createResidentAction(
     entityId: resident.id,
   });
   revalidatePath("/staff/residents");
-  return { success: "Resident added." };
+  return {
+    success: userId
+      ? `Resident added. They can sign in with ${email!.toLowerCase()} and the temporary password (they must change it).`
+      : "Resident added.",
+  };
 }
 
 export async function updateResidentAction(
@@ -83,27 +125,16 @@ export async function updateResidentAction(
   formData: FormData,
 ): Promise<ActionState> {
   const staff = await requireStaff();
-  const parsed = residentSchema.safeParse({
-    firstName: formData.get("firstName"),
-    middleName: formData.get("middleName") || undefined,
-    lastName: formData.get("lastName"),
-    suffix: formData.get("suffix") || undefined,
-    birthdate: formData.get("birthdate"),
-    gender: formData.get("gender"),
-    civilStatus: formData.get("civilStatus"),
-    contactNumber: formData.get("contactNumber") || undefined,
-    householdId: formData.get("householdId"),
-    isSenior: formData.get("isSenior") === "on",
-    isPwd: formData.get("isPwd") === "on",
-    isSoloParent: formData.get("isSoloParent") === "on",
-    isRegisteredVoter: formData.get("isRegisteredVoter") === "on",
-    isSkVoter: formData.get("isSkVoter") === "on",
-    remarks: formData.get("remarks") || undefined,
-    relation: formData.get("relation") || "MEMBER",
-  });
+  const parsed = residentSchema.safeParse(residentFormData(formData));
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid resident" };
   }
+
+  const existing = await prisma.resident.findUnique({
+    where: { id },
+    select: { userId: true },
+  });
+  if (!existing) return { error: "Resident not found." };
 
   const photo = formData.get("photo");
   let photoPath: string | undefined;
@@ -111,7 +142,28 @@ export async function updateResidentAction(
     photoPath = await saveUpload(photo, "photos");
   }
 
-  const { relation, isRegisteredVoter, isSkVoter, ...residentFields } = parsed.data;
+  const {
+    relation,
+    isRegisteredVoter,
+    isSkVoter,
+    email,
+    password,
+    ...residentFields
+  } = parsed.data;
+
+  let attachedLogin = false;
+  if (!existing.userId && email && password) {
+    const created = await createPortalUser(email.toLowerCase(), password);
+    if ("error" in created && created.error) return { error: created.error };
+    if ("user" in created) {
+      await prisma.resident.update({
+        where: { id },
+        data: { userId: created.user.id },
+      });
+      attachedLogin = true;
+    }
+  }
+
   await prisma.resident.update({
     where: { id },
     data: {
@@ -142,7 +194,11 @@ export async function updateResidentAction(
   });
   revalidatePath("/staff/residents");
   revalidatePath(`/staff/residents/${id}`);
-  return { success: "Resident updated." };
+  return {
+    success: attachedLogin
+      ? `Resident updated. Portal login created for ${email!.toLowerCase()}.`
+      : "Resident updated.",
+  };
 }
 
 export async function verifyResidentAction(
@@ -333,4 +389,28 @@ export async function transferResidentFormAction(formData: FormData) {
   revalidatePath("/staff/residents");
   revalidatePath(`/staff/residents/${id}`);
   revalidatePath("/staff/households");
+}
+
+export async function updateMyContactAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const user = await requireUser();
+  if (user.role !== "RESIDENT") {
+    return { error: "Only residents can update this contact." };
+  }
+  const contactNumber = String(formData.get("contactNumber") ?? "").trim();
+  if (contactNumber.length < 7) {
+    return { error: "Enter a valid mobile number." };
+  }
+  const me = await prisma.resident.findUnique({ where: { userId: user.id } });
+  if (!me) return { error: "No resident profile is linked to this account." };
+
+  await prisma.resident.update({
+    where: { id: me.id },
+    data: { contactNumber },
+  });
+  revalidatePath("/portal/profile");
+  revalidatePath("/portal/notices");
+  return { success: "Contact number updated. Hall notices can reach this number." };
 }

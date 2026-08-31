@@ -15,7 +15,11 @@ export default async function StaffRequestDetailPage({
   const { id } = await params;
   const request = await prisma.documentRequest.findUnique({
     where: { id },
-    include: { subject: { include: { household: true } }, certificate: true },
+    include: {
+      subject: { include: { household: true } },
+      certificate: true,
+      requestedBy: { select: { email: true, role: true } },
+    },
   });
   if (!request) notFound();
 
@@ -27,6 +31,11 @@ export default async function StaffRequestDetailPage({
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
           <StatusBadge value={request.status} />
+          {request.requestedBy.role !== "RESIDENT" ? (
+            <p className="text-muted-foreground">
+              Walk-in · filed by {request.requestedBy.email}
+            </p>
+          ) : null}
           <p>Resident: {formatResidentName(request.subject)}</p>
           <p>
             {request.subject.household.streetAddress}, {request.subject.household.purok}

@@ -5,10 +5,12 @@ import { StatusBadge } from "@/components/status-badge";
 import { prisma } from "@/lib/prisma";
 import { getResidentContext, requireUser } from "@/lib/rbac";
 import { DOCUMENT_LABELS, formatResidentName } from "@/lib/constants";
+import { countUnreadNotices } from "@/lib/announcement-notice-sql";
 
 export default async function PortalHomePage() {
   const user = await requireUser();
   const me = await getResidentContext(user.id);
+  const unread = me ? await countUnreadNotices(me.id) : 0;
   const requests = me
     ? await prisma.documentRequest.findMany({
         where: { requestedByUserId: user.id },
@@ -30,6 +32,16 @@ export default async function PortalHomePage() {
         </p>
       </div>
       {me ? <StatusBadge value={me.verificationStatus} /> : null}
+      {unread > 0 ? (
+        <Card>
+          <CardContent className="pt-6">
+            You have {unread} new hall {unread === 1 ? "notice" : "notices"}.{" "}
+            <Link href="/portal/notices" className="text-primary underline">
+              Open notices
+            </Link>
+          </CardContent>
+        </Card>
+      ) : null}
       {user.mustChangePassword ? (
         <Card>
           <CardContent className="pt-6">

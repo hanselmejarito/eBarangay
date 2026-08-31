@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 
 /** Bump this when schema fields change so the cached client is recreated. */
-const CLIENT_GEN = "voter-life-v1";
+const CLIENT_GEN = "announce-notice-v1";
 
 const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;

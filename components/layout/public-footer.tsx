@@ -18,6 +18,9 @@ export async function PublicFooter() {
           backups. Hosting and records retention remain the LGU&apos;s
           responsibility.
         </p>
+        <p className="mt-4 text-xs">
+          eBarangay developed by <span className="font-medium text-foreground">Hansel Mejarito Jr.</span>
+        </p>
       </div>
     </footer>
   );

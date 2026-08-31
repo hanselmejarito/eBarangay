@@ -74,6 +74,22 @@ export function AnnouncementForm({
         </div>
       </div>
       <ImageField name="cover" label="Cover image" existingUrl={defaults?.coverUrl} />
+      <label className="flex items-start gap-2 text-sm">
+        <input
+          type="checkbox"
+          name="notifyResidents"
+          defaultChecked={!id}
+          className="mt-1 size-4"
+        />
+        <span>
+          Notify verified residents via the portal, their login email, and
+          contact number.
+          <span className="mt-1 block text-xs text-muted-foreground">
+            Portal inbox always works. Live email/SMS need provider keys. Without
+            them, delivery is recorded against their email and mobile.
+          </span>
+        </span>
+      </label>
       <SubmitButton>Save</SubmitButton>
     </form>
   );

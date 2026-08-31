@@ -21,6 +21,8 @@ export const metadata: Metadata = {
   },
   description:
     "Barangay one-stop digital services: resident registry, certificates, complaints, and announcements.",
+  authors: [{ name: "Hansel Mejarito Jr." }],
+  creator: "Hansel Mejarito Jr.",
 };
 
 export const viewport = {

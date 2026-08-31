@@ -1,7 +1,10 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { createDocumentRequestAction } from "@/features/documents/actions";
+import {
+  createDocumentRequestAction,
+  createWalkInDocumentRequestAction,
+} from "@/features/documents/actions";
 import { DOCUMENT_LABELS } from "@/lib/constants";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,11 +21,18 @@ const TYPES = Object.entries(DOCUMENT_LABELS) as [
 export function DocumentRequestForm({
   members,
   defaultSubjectId,
+  walkIn = false,
+  submitLabel = "Submit request",
 }: {
   members: { id: string; name: string }[];
   defaultSubjectId: string;
+  walkIn?: boolean;
+  submitLabel?: string;
 }) {
-  const [state, action] = useActionState(createDocumentRequestAction, {});
+  const submit = walkIn
+    ? createWalkInDocumentRequestAction
+    : createDocumentRequestAction;
+  const [state, action] = useActionState(submit as typeof createDocumentRequestAction, {});
   const [type, setType] = useState<string>("BARANGAY_CLEARANCE");
 
   return (
@@ -79,7 +89,7 @@ export function DocumentRequestForm({
           </div>
         </>
       ) : null}
-      <SubmitButton>Submit request</SubmitButton>
+      <SubmitButton>{submitLabel}</SubmitButton>
     </form>
   );
 }

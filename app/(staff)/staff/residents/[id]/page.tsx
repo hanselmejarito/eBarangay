@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ResidentForm } from "@/features/residents/resident-form";
 import { VerifyActions } from "@/features/residents/verify-actions";
@@ -7,6 +8,7 @@ import { fileUrl } from "@/lib/files";
 import { formatResidentName } from "@/lib/constants";
 import { StatusBadge } from "@/components/status-badge";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { ResidencyActions } from "@/features/residents/residency-actions";
 import { LIFE_STATUS_LABELS, RELATION_LABELS, RESIDENCY_LABELS } from "@/lib/constants";
 import { effectiveVoterStatus, yearsOld } from "@/lib/age";
@@ -61,6 +63,7 @@ export default async function ResidentDetailPage({
         </div>
         <p className="mt-2 text-sm text-muted-foreground">
           Age {yearsOld(resident.birthdate)}
+          {resident.user?.email ? ` · portal ${resident.user.email}` : " · no portal login"}
           {effectiveVoterStatus(residency, resident.birthdate).sk
             ? " · counted as SK voter (15–30)"
             : ""}
@@ -117,6 +120,15 @@ export default async function ResidentDetailPage({
       {resident.verificationStatus === "PENDING" ? (
         <VerifyActions id={resident.id} />
       ) : null}
+      {resident.verificationStatus === "VERIFIED" &&
+      residency.lifeStatus === "ALIVE" &&
+      residency.residencyStatus === "ACTIVE" ? (
+        <Button asChild>
+          <Link href={`/staff/requests/new?residentId=${resident.id}`}>
+            Walk-in request
+          </Link>
+        </Button>
+      ) : null}
       <ResidencyActions
         id={resident.id}
         currentHouseholdId={resident.householdId}
@@ -145,6 +157,7 @@ export default async function ResidentDetailPage({
           remarks: resident.remarks,
           photoUrl: fileUrl(resident.photoPath),
           relation: residency.relation,
+          loginEmail: resident.user?.email ?? null,
         }}
       />
     </div>

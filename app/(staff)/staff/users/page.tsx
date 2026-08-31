@@ -37,7 +37,7 @@ export default async function UsersPage({
       <div>
         <h1 className="font-serif text-2xl font-semibold">Users</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          This page manages login accounts (create staff, suspend, restore).
+          Create staff, change a login email or password, suspend, or restore.
           Resident identity is approved in the verification queue, not here.
         </p>
       </div>
@@ -45,43 +45,51 @@ export default async function UsersPage({
       <div className="space-y-2">
         {users.map((u) => (
           <div key={u.id} className="flex items-center justify-between gap-3 rounded-lg border p-3">
-            <div>
-              <p className="font-medium">{u.email}</p>
-              <p className="text-sm text-muted-foreground">
-                {u.role}
-                {u.resident ? ` · ${u.resident.firstName} ${u.resident.lastName}` : ""}
-              </p>
+            <div className="min-w-0">
+              <p className="truncate font-medium">{u.email}</p>
+              <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                <span>
+                  {u.role}
+                  {u.resident ? ` · ${u.resident.firstName} ${u.resident.lastName}` : ""}
+                </span>
+                <Badge
+                  variant="secondary"
+                  className={
+                    u.status === "PENDING_VERIFICATION"
+                      ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200"
+                      : u.status === "SUSPENDED"
+                        ? "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200"
+                        : undefined
+                  }
+                >
+                  {STATUS_LABEL[u.status] ?? u.status}
+                </Badge>
+              </div>
             </div>
-            <div className="flex flex-wrap items-center justify-end gap-2">
-              <Badge variant="outline">{u.role}</Badge>
-              <Badge
-                variant={u.status === "ACTIVE" ? "secondary" : "outline"}
-                className={
-                  u.status === "PENDING_VERIFICATION"
-                    ? "bg-amber-100 text-amber-800"
-                    : u.status === "SUSPENDED"
-                      ? "bg-red-100 text-red-800"
-                      : ""
-                }
-              >
-                {STATUS_LABEL[u.status] ?? u.status}
-              </Badge>
+            <div className="flex shrink-0 gap-1">
+              <Button variant="outline" size="sm" asChild>
+                <Link href={`/staff/users/${u.id}`}>Update</Link>
+              </Button>
               {u.status === "PENDING_VERIFICATION" && u.resident ? (
-                <Button variant="outline" asChild>
-                  <Link href={`/staff/residents/${u.resident.id}`}>Verify resident</Link>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href={`/staff/residents/${u.resident.id}`}>Verify</Link>
                 </Button>
               ) : null}
               {u.status === "SUSPENDED" ? (
                 <form action={setUserStatusFormAction}>
                   <input type="hidden" name="id" value={u.id} />
                   <input type="hidden" name="status" value="ACTIVE" />
-                  <SubmitButton variant="outline">Activate</SubmitButton>
+                  <SubmitButton variant="outline" size="sm">
+                    Activate
+                  </SubmitButton>
                 </form>
               ) : u.status === "ACTIVE" ? (
                 <form action={setUserStatusFormAction}>
                   <input type="hidden" name="id" value={u.id} />
                   <input type="hidden" name="status" value="SUSPENDED" />
-                  <SubmitButton variant="destructive">Suspend</SubmitButton>
+                  <SubmitButton variant="ghost" size="sm">
+                    Suspend
+                  </SubmitButton>
                 </form>
               ) : null}
             </div>

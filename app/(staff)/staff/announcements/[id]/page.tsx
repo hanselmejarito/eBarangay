@@ -1,7 +1,10 @@
 import { notFound } from "next/navigation";
 import { AnnouncementForm } from "@/features/announcements/announcement-form";
+import { NotifyResidentsButton } from "@/features/announcements/notify-button";
 import { prisma } from "@/lib/prisma";
 import { fileUrl } from "@/lib/files";
+import { listNoticesForAnnouncement } from "@/lib/announcement-notice-sql";
+import { Badge } from "@/components/ui/badge";
 
 function localInput(d: Date | null) {
   if (!d) return "";
@@ -15,11 +18,14 @@ export default async function EditAnnouncementPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const item = await prisma.announcement.findUnique({ where: { id } });
+  const [item, notices] = await Promise.all([
+    prisma.announcement.findUnique({ where: { id } }),
+    listNoticesForAnnouncement(id),
+  ]);
   if (!item) notFound();
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <h1 className="font-serif text-2xl font-semibold">Edit announcement</h1>
       <AnnouncementForm
         id={item.id}
@@ -32,6 +38,44 @@ export default async function EditAnnouncementPage({
           coverUrl: fileUrl(item.coverPath),
         }}
       />
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold">Recipients</h2>
+        <p className="text-sm text-muted-foreground">
+          Verified living residents with a login email and/or contact number.
+        </p>
+        {notices.length === 0 ? (
+          <NotifyResidentsButton id={item.id} />
+        ) : (
+          <div className="space-y-2">
+            {notices.map((n) => (
+              <div
+                key={n.id}
+                className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3 text-sm"
+              >
+                <p className="font-medium">
+                  {n.firstName} {n.lastName}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {n.email ? (
+                    <Badge variant="secondary">
+                      {n.email} · {n.emailStatus.toLowerCase()}
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline">No email</Badge>
+                  )}
+                  {n.mobile ? (
+                    <Badge variant="secondary">
+                      {n.mobile} · {n.smsStatus.toLowerCase()}
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline">No mobile</Badge>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }

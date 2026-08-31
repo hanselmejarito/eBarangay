@@ -23,6 +23,8 @@ import {
   Contact,
   Package,
   Wallet,
+  KeyRound,
+  Inbox,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { logoutAction } from "@/features/auth/actions";
@@ -137,6 +139,9 @@ function SidebarFooter() {
           Sign out
         </Button>
       </form>
+      <p className="px-3 pt-2 text-[11px] leading-snug text-sidebar-foreground/55">
+        Developed by Hansel Mejarito Jr.
+      </p>
     </div>
   );
 }
@@ -220,6 +225,7 @@ export const staffNav: Item[] = [
   { href: "/staff/budget", label: "Budget", icon: Wallet },
   { href: "/staff/scan", label: "Scan ID", icon: IdCard },
   { href: "/staff/reports", label: "Reports", icon: ClipboardList },
+  { href: "/staff/password", label: "Password", icon: KeyRound },
 ];
 
 export const adminNav: Item[] = [
@@ -230,6 +236,7 @@ export const adminNav: Item[] = [
 
 export const portalNav: Item[] = [
   { href: "/portal", label: "Home", icon: Home },
+  { href: "/portal/notices", label: "Notices", icon: Inbox },
   { href: "/portal/profile", label: "Profile", icon: Users },
   { href: "/portal/requests", label: "Documents", icon: FileText },
   { href: "/portal/complaints", label: "Complaints", icon: MessageSquareWarning },
@@ -237,4 +244,5 @@ export const portalNav: Item[] = [
   { href: "/announcements", label: "Announcements", icon: Megaphone },
   { href: "/achievements", label: "Awards", icon: Trophy },
   { href: "/officials", label: "Officials", icon: Contact },
+  { href: "/portal/password", label: "Password", icon: KeyRound },
 ];

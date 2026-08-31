@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { writeAudit } from "@/lib/audit";
 import { saveBuffer } from "@/lib/files";
 import { documentRequestSchema } from "@/lib/validations";
+import { redirect } from "next/navigation";
 import {
   assertHouseholdAccess,
   requireStaff,
@@ -17,19 +18,8 @@ import { buildCertificatePdf } from "@/lib/pdf";
 import { certificateToken } from "@/lib/qr";
 import type { ActionState } from "@/features/auth/actions";
 
-export async function createDocumentRequestAction(
-  _prev: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
-  const user = await requireUser();
-  if (user.role !== "RESIDENT") {
-    return { error: "Only residents can submit requests from the portal." };
-  }
-  if (user.status !== "ACTIVE") {
-    return { error: "Your account must be verified before requesting documents." };
-  }
-
-  const parsed = documentRequestSchema.safeParse({
+function parseRequestForm(formData: FormData) {
+  return documentRequestSchema.safeParse({
     type: formData.get("type"),
     purpose: formData.get("purpose"),
     subjectResidentId: formData.get("subjectResidentId"),
@@ -37,15 +27,11 @@ export async function createDocumentRequestAction(
     businessAddress: formData.get("businessAddress") || undefined,
     businessNature: formData.get("businessNature") || undefined,
   });
-  if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Invalid request" };
-  }
+}
 
-  const allowed = await assertHouseholdAccess(user.id, parsed.data.subjectResidentId);
-  if (!allowed) return { error: "You can only request for your household." };
-
+async function assertEligibleDocumentSubject(subjectResidentId: string) {
   const subject = await prisma.resident.findUnique({
-    where: { id: parsed.data.subjectResidentId },
+    where: { id: subjectResidentId },
   });
   if (!subject || subject.verificationStatus !== "VERIFIED") {
     return { error: "The subject resident is not verified." };
@@ -68,6 +54,31 @@ export async function createDocumentRequestAction(
         "This person has moved out. Staff must transfer them to a current household before requesting papers.",
     };
   }
+  return { subject };
+}
+
+export async function createDocumentRequestAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const user = await requireUser();
+  if (user.role !== "RESIDENT") {
+    return { error: "Only residents can submit requests from the portal." };
+  }
+  if (user.status !== "ACTIVE") {
+    return { error: "Your account must be verified before requesting documents." };
+  }
+
+  const parsed = parseRequestForm(formData);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid request" };
+  }
+
+  const allowed = await assertHouseholdAccess(user.id, parsed.data.subjectResidentId);
+  if (!allowed) return { error: "You can only request for your household." };
+
+  const eligible = await assertEligibleDocumentSubject(parsed.data.subjectResidentId);
+  if (eligible.error) return { error: eligible.error };
 
   const settings = await getSettings();
   const request = await prisma.documentRequest.create({
@@ -91,6 +102,44 @@ export async function createDocumentRequestAction(
   });
   revalidatePath("/portal/requests");
   return { success: "Request submitted." };
+}
+
+export async function createWalkInDocumentRequestAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const staff = await requireStaff();
+  const parsed = parseRequestForm(formData);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid request" };
+  }
+
+  const eligible = await assertEligibleDocumentSubject(parsed.data.subjectResidentId);
+  if (eligible.error) return { error: eligible.error };
+
+  const settings = await getSettings();
+  const request = await prisma.documentRequest.create({
+    data: {
+      type: parsed.data.type,
+      purpose: parsed.data.purpose,
+      subjectResidentId: parsed.data.subjectResidentId,
+      requestedByUserId: staff.id,
+      businessName: parsed.data.businessName,
+      businessAddress: parsed.data.businessAddress,
+      businessNature: parsed.data.businessNature,
+      feeAmount: feeForType(settings, parsed.data.type),
+      staffNotes: "Walk-in at the barangay hall.",
+    },
+  });
+
+  await writeAudit({
+    actorId: staff.id,
+    action: "WALK_IN_DOCUMENT_REQUEST",
+    entityType: "DocumentRequest",
+    entityId: request.id,
+  });
+  revalidatePath("/staff/requests");
+  redirect(`/staff/requests/${request.id}`);
 }
 
 export async function updateRequestStatusAction(

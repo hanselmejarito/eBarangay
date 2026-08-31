@@ -30,6 +30,7 @@ type Values = {
   remarks?: string | null;
   photoUrl?: string | null;
   relation?: string;
+  loginEmail?: string | null;
 };
 
 export function ResidentForm({
@@ -90,7 +91,51 @@ export function ResidentForm({
           <option value="SEPARATED">Separated</option>
         </NativeSelect>
       </div>
-      <Field label="Contact" name="contactNumber" defaultValue={defaults?.contactNumber ?? ""} />
+      <div className="space-y-2">
+        <Label htmlFor="contactNumber">Contact number</Label>
+        <Input
+          id="contactNumber"
+          name="contactNumber"
+          defaultValue={defaults?.contactNumber ?? ""}
+          placeholder="09XXXXXXXXX"
+        />
+        <p className="text-xs text-muted-foreground">
+          Mobile number for announcement SMS. Leave blank only if they have no
+          phone (children).
+        </p>
+      </div>
+      {defaults?.loginEmail ? (
+        <div className="space-y-1">
+          <p className="text-sm font-medium">Portal login</p>
+          <p className="text-sm text-muted-foreground">
+            {defaults.loginEmail} — change email or password in Users.
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="space-y-2">
+            <Label htmlFor="email">Portal email</Label>
+            <Input id="email" name="email" type="email" autoComplete="off" />
+            <p className="text-xs text-muted-foreground">
+              Optional. If set, they can sign in and request documents. Leave
+              blank for children or residents without email (use walk-in).
+            </p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">Temporary password</Label>
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              autoComplete="new-password"
+            />
+            <p className="text-xs text-muted-foreground">
+              Required with email. 8+ characters, one uppercase letter, one
+              number. They must change it on first login.
+            </p>
+          </div>
+        </>
+      )}
       <div className="space-y-2">
         <Label htmlFor="householdId">Household</Label>
         <NativeSelect

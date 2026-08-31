@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { writeAudit } from "@/lib/audit";
-import { staffUserSchema } from "@/lib/validations";
+import { staffUserSchema, updateUserAccountSchema } from "@/lib/validations";
 import { requireAdmin } from "@/lib/rbac";
 import type { ActionState } from "@/features/auth/actions";
 import type { UserStatus } from "@prisma/client";
@@ -46,6 +46,60 @@ export async function createStaffUserAction(
   });
   revalidatePath("/staff/users");
   return { success: "Staff account created. They must change the password on first login." };
+}
+
+export async function updateUserAccountAction(
+  id: string,
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const admin = await requireAdmin();
+  const parsed = updateUserAccountSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password") || undefined,
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid account" };
+  }
+
+  const email = parsed.data.email.toLowerCase();
+  const taken = await prisma.user.findFirst({
+    where: { email, NOT: { id } },
+    select: { id: true },
+  });
+  if (taken) return { error: "Email already in use." };
+
+  const data: {
+    email: string;
+    passwordHash?: string;
+    mustChangePassword?: boolean;
+    sessionVersion?: { increment: number };
+  } = { email };
+
+  if (parsed.data.password) {
+    data.passwordHash = await bcrypt.hash(parsed.data.password, 10);
+    data.mustChangePassword = id !== admin.id;
+    data.sessionVersion = { increment: 1 };
+  } else {
+    data.sessionVersion = { increment: 1 };
+  }
+
+  await prisma.user.update({ where: { id }, data });
+
+  await writeAudit({
+    actorId: admin.id,
+    action: parsed.data.password ? "UPDATE_USER_ACCOUNT" : "UPDATE_USER_EMAIL",
+    entityType: "User",
+    entityId: id,
+    metadata: { email },
+  });
+  revalidatePath("/staff/users");
+  revalidatePath(`/staff/users/${id}`);
+  return {
+    success: parsed.data.password
+      ? "Email and password updated. They must sign in again."
+      : "Email updated. They must sign in again.",
+  };
 }
 
 export async function setUserStatusAction(

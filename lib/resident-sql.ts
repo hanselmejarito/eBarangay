@@ -347,6 +347,53 @@ export async function listActiveVerifiedHouseholdMembers(householdId: string) {
   `;
 }
 
+export type DocumentSubjectRow = {
+  id: string;
+  firstName: string;
+  middleName: string | null;
+  lastName: string;
+  suffix: string | null;
+  householdNumber: string;
+  purok: string;
+};
+
+export async function listEligibleDocumentSubjects(filters: {
+  q?: string;
+  ids?: string[];
+  take?: number;
+}) {
+  const parts: Prisma.Sql[] = [
+    Prisma.sql`r."verificationStatus"::text = 'VERIFIED'`,
+    Prisma.sql`r."residencyStatus"::text = 'ACTIVE'`,
+    Prisma.sql`r."lifeStatus"::text = 'ALIVE'`,
+  ];
+  if (filters.q) {
+    const q = `%${filters.q}%`;
+    parts.push(
+      Prisma.sql`(r."firstName" ILIKE ${q} OR r."lastName" ILIKE ${q} OR h."householdNumber" ILIKE ${q})`,
+    );
+  }
+  if (filters.ids?.length) {
+    parts.push(Prisma.sql`r.id IN (${Prisma.join(filters.ids)})`);
+  }
+
+  return prisma.$queryRaw<DocumentSubjectRow[]>`
+    SELECT
+      r.id,
+      r."firstName",
+      r."middleName",
+      r."lastName",
+      r.suffix,
+      h."householdNumber",
+      h.purok
+    FROM "Resident" r
+    JOIN "Household" h ON h.id = r."householdId"
+    WHERE ${and(parts)}
+    ORDER BY r."lastName" ASC, r."firstName" ASC
+    LIMIT ${filters.take ?? 80}
+  `;
+}
+
 export async function countActiveMembersByHousehold() {
   const rows = await prisma.$queryRaw<{ householdId: string; count: bigint }[]>`
     SELECT "householdId", COUNT(*)::bigint AS count

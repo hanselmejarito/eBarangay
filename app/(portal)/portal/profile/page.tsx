@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/status-badge";
@@ -12,6 +13,7 @@ import {
 } from "@/lib/constants";
 import { fileUrl } from "@/lib/files";
 import { effectiveVoterStatus } from "@/lib/age";
+import { ContactForm } from "@/features/residents/contact-form";
 
 export default async function ProfilePage() {
   const user = await requireUser();
@@ -61,7 +63,15 @@ export default async function ProfilePage() {
             <Badge variant="outline">SK voter</Badge>
           ) : null}
         </div>
-        <p className="text-muted-foreground">{user.email}</p>
+        <p className="text-muted-foreground">
+          {user.email} ·{" "}
+          <Link href="/portal/password" className="text-primary underline">
+            Change password
+          </Link>
+        </p>
+        <div className="border-t pt-4">
+          <ContactForm contactNumber={me.contactNumber ?? ""} />
+        </div>
       </CardContent>
     </Card>
   );

@@ -1,6 +1,12 @@
 import { z } from "zod";
 import { voterAgeErrors } from "@/lib/age";
 
+const passwordRules = z
+  .string()
+  .min(8, "At least 8 characters")
+  .regex(/[A-Z]/, "Include an uppercase letter")
+  .regex(/[0-9]/, "Include a number");
+
 export const loginSchema = z.object({
   email: z.email("Enter a valid email"),
   password: z.string().min(1, "Password is required"),
@@ -56,9 +62,43 @@ export const residentSchema = z.object({
   isSkVoter: z.boolean().optional(),
   remarks: z.string().optional(),
   relation: z.enum(["MEMBER", "BOARDER"]).optional(),
+  email: z.string().optional(),
+  password: z.string().optional(),
 }).superRefine((data, ctx) => {
   for (const message of voterAgeErrors(data.birthdate, data)) {
     ctx.addIssue({ code: "custom", path: ["isSkVoter"], message });
+  }
+  const email = data.email?.trim();
+  const password = data.password?.trim();
+  if (!email && !password) return;
+  if (!email) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["email"],
+      message: "Email is required to create a portal login.",
+    });
+  } else if (!z.email().safeParse(email).success) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["email"],
+      message: "Enter a valid email",
+    });
+  }
+  if (!password) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["password"],
+      message: "Temporary password is required with the email.",
+    });
+  } else {
+    const pwd = passwordRules.safeParse(password);
+    if (!pwd.success) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["password"],
+        message: pwd.error.issues[0]?.message ?? "Password is too weak",
+      });
+    }
   }
 });
 
@@ -231,6 +271,15 @@ export const staffUserSchema = z.object({
   email: z.email(),
   password: z.string().min(8),
   role: z.enum(["STAFF", "ADMIN"]),
+});
+
+export const updateUserAccountSchema = z.object({
+  email: z.email("Enter a valid email"),
+  password: z
+    .string()
+    .optional()
+    .transform((v) => v?.trim() || undefined)
+    .pipe(passwordRules.optional()),
 });
 
 export const changePasswordSchema = z

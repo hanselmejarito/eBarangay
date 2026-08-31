@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/status-badge";
 import { EmptyState } from "@/components/empty-state";
 import {
@@ -28,7 +29,7 @@ export default async function StaffRequestsPage({
   const meta = paginationMeta(total, paging.page, paging.pageSize);
   const rows = await prisma.documentRequest.findMany({
     where,
-    include: { subject: true },
+    include: { subject: true, requestedBy: { select: { role: true } } },
     orderBy: { createdAt: "desc" },
     skip: meta.skip,
     take: meta.take,
@@ -36,7 +37,12 @@ export default async function StaffRequestsPage({
 
   return (
     <div className="space-y-4">
-      <h1 className="font-serif text-2xl font-semibold">Document requests</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="font-serif text-2xl font-semibold">Document requests</h1>
+        <Button asChild>
+          <Link href="/staff/requests/new">Walk-in request</Link>
+        </Button>
+      </div>
       <form className="flex gap-2">
         <input type="hidden" name="pageSize" value={String(meta.pageSize)} />
         <NativeSelect name="status" defaultValue={status ?? ""}>
@@ -71,6 +77,9 @@ export default async function StaffRequestsPage({
                   <Link href={`/staff/requests/${r.id}`} className="text-primary">
                     {DOCUMENT_LABELS[r.type]}
                   </Link>
+                  {r.requestedBy.role !== "RESIDENT" ? (
+                    <p className="text-xs text-muted-foreground">Walk-in</p>
+                  ) : null}
                 </TableCell>
                 <TableCell>{formatResidentName(r.subject)}</TableCell>
                 <TableCell>
