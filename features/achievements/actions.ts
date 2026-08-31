@@ -10,6 +10,7 @@ import {
   insertAchievement,
   updateAchievement,
 } from "@/lib/achievement-sql";
+import { parseManilaDate, parseManilaDateTime } from "@/lib/datetime";
 import type { ActionState } from "@/features/auth/actions";
 import type { AchievementCategory } from "@prisma/client";
 
@@ -42,10 +43,8 @@ export async function upsertAchievementAction(
     description: parsed.data.description,
     category: parsed.data.category as AchievementCategory,
     awardedBy: parsed.data.awardedBy ?? null,
-    awardedAt: new Date(parsed.data.awardedAt),
-    publishedAt: parsed.data.publishedAt
-      ? new Date(parsed.data.publishedAt)
-      : new Date(),
+    awardedAt: parseManilaDate(parsed.data.awardedAt) ?? new Date(),
+    publishedAt: parseManilaDateTime(parsed.data.publishedAt) ?? new Date(),
     imagePath,
   };
 
@@ -81,5 +80,5 @@ export async function deleteAchievementAction(id: string): Promise<ActionState> 
 }
 
 export async function deleteAchievementFormAction(formData: FormData) {
-  await deleteAchievementAction(String(formData.get("id")));
+  return deleteAchievementAction(String(formData.get("id")));
 }

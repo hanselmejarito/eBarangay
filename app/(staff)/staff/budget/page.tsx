@@ -23,6 +23,7 @@ import { paginationFromSearch, paginationMeta } from "@/lib/pagination";
 import { BUDGET_CATEGORY_LABELS, pesos } from "@/lib/constants";
 import { deleteBudgetLineFormAction } from "@/features/budget/actions";
 import { SubmitButton } from "@/components/submit-button";
+import { FeedbackForm } from "@/components/feedback-form";
 
 export default async function StaffBudgetPage({
   searchParams,
@@ -135,10 +136,10 @@ export default async function StaffBudgetPage({
                       <Button variant="outline" size="sm" asChild>
                         <Link href={`/staff/budget/${row.id}`}>Update</Link>
                       </Button>
-                      <form action={deleteBudgetLineFormAction}>
+                      <FeedbackForm action={deleteBudgetLineFormAction}>
                         <input type="hidden" name="id" value={row.id} />
                         <SubmitButton variant="ghost">Delete</SubmitButton>
-                      </form>
+                      </FeedbackForm>
                     </div>
                   </TableCell>
                 </TableRow>

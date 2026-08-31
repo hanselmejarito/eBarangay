@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { CreateStaffForm } from "@/features/users/create-staff-form";
 import { setUserStatusFormAction } from "@/features/users/actions";
 import { SubmitButton } from "@/components/submit-button";
+import { FeedbackForm } from "@/components/feedback-form";
 import { ListPagination } from "@/components/list-pagination";
 import { paginationFromSearch, paginationMeta } from "@/lib/pagination";
 
@@ -76,21 +77,21 @@ export default async function UsersPage({
                 </Button>
               ) : null}
               {u.status === "SUSPENDED" ? (
-                <form action={setUserStatusFormAction}>
+                <FeedbackForm action={setUserStatusFormAction}>
                   <input type="hidden" name="id" value={u.id} />
                   <input type="hidden" name="status" value="ACTIVE" />
                   <SubmitButton variant="outline" size="sm">
                     Activate
                   </SubmitButton>
-                </form>
+                </FeedbackForm>
               ) : u.status === "ACTIVE" ? (
-                <form action={setUserStatusFormAction}>
+                <FeedbackForm action={setUserStatusFormAction}>
                   <input type="hidden" name="id" value={u.id} />
                   <input type="hidden" name="status" value="SUSPENDED" />
                   <SubmitButton variant="ghost" size="sm">
                     Suspend
                   </SubmitButton>
-                </form>
+                </FeedbackForm>
               ) : null}
             </div>
           </div>

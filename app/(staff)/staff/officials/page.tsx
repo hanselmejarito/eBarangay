@@ -7,6 +7,7 @@ import { ListPagination } from "@/components/list-pagination";
 import { paginationFromSearch, paginationMeta } from "@/lib/pagination";
 import { OFFICIAL_ROLE_LABELS } from "@/lib/constants";
 import { deleteOfficialFormAction } from "@/features/officials/actions";
+import { FeedbackForm } from "@/components/feedback-form";
 import { SubmitButton } from "@/components/submit-button";
 
 export default async function StaffOfficialsPage({
@@ -53,10 +54,10 @@ export default async function StaffOfficialsPage({
                 <Button variant="outline" size="sm" asChild>
                   <Link href={`/staff/officials/${o.id}`}>Update</Link>
                 </Button>
-                <form action={deleteOfficialFormAction}>
+                <FeedbackForm action={deleteOfficialFormAction}>
                   <input type="hidden" name="id" value={o.id} />
                   <SubmitButton variant="ghost">Delete</SubmitButton>
-                </form>
+                </FeedbackForm>
               </div>
             </div>
           ))}

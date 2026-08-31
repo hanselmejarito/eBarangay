@@ -72,6 +72,7 @@ export async function deleteBudgetLineFormAction(formData: FormData) {
     entityId: id,
   });
   refreshBudget();
+  return { success: "Allocation removed." };
 }
 
 export async function createBudgetExpenseAction(
@@ -137,4 +138,5 @@ export async function deleteBudgetExpenseFormAction(formData: FormData) {
     entityId: id,
   });
   refreshBudget(undefined, lineId || undefined);
+  return { success: "Expense removed." };
 }

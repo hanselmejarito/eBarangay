@@ -1,3 +1,5 @@
+import { formatManilaDateTime } from "@/lib/datetime";
+
 function escapeHtml(value: string) {
   return value
     .replaceAll("&", "&amp;")
@@ -7,12 +9,7 @@ function escapeHtml(value: string) {
 }
 
 function formatWhen(value: Date | null | undefined) {
-  if (!value) return null;
-  return value.toLocaleString("en-PH", {
-    dateStyle: "long",
-    timeStyle: "short",
-    timeZone: "Asia/Manila",
-  });
+  return formatManilaDateTime(value);
 }
 
 function bodyHtml(content: string) {

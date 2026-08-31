@@ -80,7 +80,7 @@ export async function updateComplaintStatusAction(
 }
 
 export async function updateComplaintStatusFormAction(formData: FormData) {
-  await updateComplaintStatusAction(
+  return updateComplaintStatusAction(
     String(formData.get("id")),
     String(formData.get("status")) as ComplaintStatus,
     formData,

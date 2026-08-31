@@ -5,6 +5,7 @@ import { updateComplaintStatusFormAction } from "@/features/complaints/actions";
 import { SubmitButton } from "@/components/submit-button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { FeedbackForm } from "@/components/feedback-form";
 import { prisma } from "@/lib/prisma";
 import { COMPLAINT_CATEGORY_LABELS, formatResidentName } from "@/lib/constants";
 import { fileUrl } from "@/lib/files";
@@ -46,18 +47,18 @@ export default async function StaffComplaintDetailPage({
         </CardContent>
       </Card>
       <div className="flex flex-wrap gap-2">
-        <form action={updateComplaintStatusFormAction}>
+        <FeedbackForm action={updateComplaintStatusFormAction}>
           <input type="hidden" name="id" value={id} />
           <input type="hidden" name="status" value="IN_PROGRESS" />
           <SubmitButton>Mark in progress</SubmitButton>
-        </form>
-        <form action={updateComplaintStatusFormAction} className="space-y-2">
+        </FeedbackForm>
+        <FeedbackForm action={updateComplaintStatusFormAction} className="space-y-2" showMessage>
           <input type="hidden" name="id" value={id} />
           <input type="hidden" name="status" value="RESOLVED" />
           <Label htmlFor="resolutionNotes">Resolution notes</Label>
           <Textarea id="resolutionNotes" name="resolutionNotes" />
           <SubmitButton>Resolve</SubmitButton>
-        </form>
+        </FeedbackForm>
       </div>
     </div>
   );

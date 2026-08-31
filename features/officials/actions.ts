@@ -78,5 +78,5 @@ export async function deleteOfficialAction(id: string): Promise<ActionState> {
 }
 
 export async function deleteOfficialFormAction(formData: FormData) {
-  await deleteOfficialAction(String(formData.get("id")));
+  return deleteOfficialAction(String(formData.get("id")));
 }

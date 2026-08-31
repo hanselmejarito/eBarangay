@@ -250,7 +250,7 @@ export async function verifyResidentAction(
 }
 
 export async function verifyResidentFormAction(formData: FormData) {
-  await verifyResidentAction(
+  return verifyResidentAction(
     String(formData.get("id")),
     String(formData.get("decision")) as "VERIFIED" | "REJECTED",
     formData,
@@ -261,10 +261,10 @@ export async function moveOutResidentFormAction(formData: FormData) {
   const staff = await requireStaff();
   const id = String(formData.get("id"));
   const note = String(formData.get("movedOutNote") ?? "").trim();
-  if (!note) return;
+  if (!note) return { error: "Add a note about where they went." };
 
   const resident = await prisma.resident.findUnique({ where: { id } });
-  if (!resident) return;
+  if (!resident) return { error: "Resident not found." };
 
   await prisma.$executeRaw`
     UPDATE "Resident"
@@ -288,16 +288,17 @@ export async function moveOutResidentFormAction(formData: FormData) {
   revalidatePath("/staff/residents");
   revalidatePath(`/staff/residents/${id}`);
   revalidatePath("/staff/households");
+  return { success: `${resident.firstName} is marked as moved out.` };
 }
 
 export async function markDeceasedFormAction(formData: FormData) {
   const staff = await requireStaff();
   const id = String(formData.get("id"));
   const note = String(formData.get("deathNote") ?? "").trim();
-  if (!note) return;
+  if (!note) return { error: "Add a cause or source of the report." };
 
   const resident = await prisma.resident.findUnique({ where: { id } });
-  if (!resident) return;
+  if (!resident) return { error: "Resident not found." };
 
   await prisma.$executeRaw`
     UPDATE "Resident"
@@ -323,6 +324,7 @@ export async function markDeceasedFormAction(formData: FormData) {
   revalidatePath("/staff/households");
   revalidatePath("/staff/dashboard");
   revalidatePath("/staff/reports");
+  return { success: `${resident.firstName} is recorded as deceased.` };
 }
 
 export async function restoreLivingFormAction(formData: FormData) {
@@ -348,6 +350,7 @@ export async function restoreLivingFormAction(formData: FormData) {
   revalidatePath("/staff/households");
   revalidatePath("/staff/dashboard");
   revalidatePath("/staff/reports");
+  return { success: "Resident restored as living." };
 }
 
 export async function transferResidentFormAction(formData: FormData) {
@@ -355,12 +358,14 @@ export async function transferResidentFormAction(formData: FormData) {
   const id = String(formData.get("id"));
   const householdId = String(formData.get("householdId") ?? "");
   const relation = formData.get("relation") === "BOARDER" ? "BOARDER" : "MEMBER";
-  if (!householdId) return;
+  if (!householdId) return { error: "Choose a household." };
 
   const life = await prisma.$queryRaw<[{ lifeStatus: string }]>`
     SELECT "lifeStatus"::text AS "lifeStatus" FROM "Resident" WHERE id = ${id}
   `;
-  if (life[0]?.lifeStatus === "DECEASED") return;
+  if (life[0]?.lifeStatus === "DECEASED") {
+    return { error: "Restore as living before transferring." };
+  }
 
   await prisma.household.updateMany({
     where: { headResidentId: id },
@@ -389,6 +394,7 @@ export async function transferResidentFormAction(formData: FormData) {
   revalidatePath("/staff/residents");
   revalidatePath(`/staff/residents/${id}`);
   revalidatePath("/staff/households");
+  return { success: "Household transfer saved." };
 }
 
 export async function updateMyContactAction(

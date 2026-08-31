@@ -8,6 +8,7 @@ import { announcementSchema } from "@/lib/validations";
 import { requireStaff } from "@/lib/rbac";
 import { notifyResidentsOfAnnouncement } from "@/lib/notify";
 import type { ActionState } from "@/features/auth/actions";
+import { parseManilaDateTime } from "@/lib/datetime";
 
 export async function upsertAnnouncementAction(
   id: string | null,
@@ -36,10 +37,8 @@ export async function upsertAnnouncementAction(
     title: parsed.data.title,
     content: parsed.data.content,
     priority: parsed.data.priority,
-    publishedAt: parsed.data.publishedAt
-      ? new Date(parsed.data.publishedAt)
-      : new Date(),
-    expiresAt: parsed.data.expiresAt ? new Date(parsed.data.expiresAt) : null,
+    publishedAt: parseManilaDateTime(parsed.data.publishedAt) ?? new Date(),
+    expiresAt: parseManilaDateTime(parsed.data.expiresAt),
     ...(coverPath ? { coverPath } : {}),
   };
 
@@ -94,5 +93,5 @@ export async function deleteAnnouncementAction(id: string): Promise<ActionState>
 }
 
 export async function deleteAnnouncementFormAction(formData: FormData) {
-  await deleteAnnouncementAction(String(formData.get("id")));
+  return deleteAnnouncementAction(String(formData.get("id")));
 }

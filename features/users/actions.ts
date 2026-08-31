@@ -128,7 +128,7 @@ export async function setUserStatusAction(
 }
 
 export async function setUserStatusFormAction(formData: FormData) {
-  await setUserStatusAction(
+  return setUserStatusAction(
     String(formData.get("id")),
     String(formData.get("status")) as UserStatus,
   );

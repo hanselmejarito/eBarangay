@@ -11,6 +11,7 @@ import {
 import { EmptyState } from "@/components/empty-state";
 import { ListPagination } from "@/components/list-pagination";
 import { paginationFromSearch, paginationMeta } from "@/lib/pagination";
+import { formatManilaDateTime } from "@/lib/datetime";
 
 export default async function AuditPage({
   searchParams,
@@ -52,7 +53,7 @@ export default async function AuditPage({
             {rows.map((r) => (
               <TableRow key={r.id}>
                 <TableCell className="whitespace-nowrap text-xs">
-                  {r.createdAt.toLocaleString("en-PH")}
+                  {formatManilaDateTime(r.createdAt)}
                 </TableCell>
                 <TableCell>{r.actor?.email ?? "system"}</TableCell>
                 <TableCell>{r.action}</TableCell>

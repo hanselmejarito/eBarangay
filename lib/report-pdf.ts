@@ -1,5 +1,6 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { formatResidentName } from "@/lib/constants";
+import { formatManilaDateTime } from "@/lib/datetime";
 
 type Row = {
   firstName: string;
@@ -50,7 +51,7 @@ export async function buildResidentReportPdf({
   page.drawText(title, { x: 48, y, size: 16, font: bold, color: ink });
   y -= 14;
   page.drawText(
-    `Generated ${generatedAt.toLocaleString("en-PH")} · ${rows.length} record(s)`,
+    `Generated ${formatManilaDateTime(generatedAt)} · ${rows.length} record(s)`,
     { x: 48, y, size: 9, font, color: muted },
   );
   y -= 24;

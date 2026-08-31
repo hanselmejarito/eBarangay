@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
 import { parseSignedToken } from "@/lib/qr";
 import { DOCUMENT_LABELS, formatResidentName } from "@/lib/constants";
+import { formatManilaDate } from "@/lib/datetime";
 import { StatusBadge } from "@/components/status-badge";
 import { fileUrl } from "@/lib/files";
 import { Button } from "@/components/ui/button";
@@ -38,10 +39,7 @@ export default async function VerifyCertificatePage({
           <p>Control no. {request.controlNumber}</p>
           <p>Issued to {formatResidentName(request.subject)}</p>
           <p>
-            Valid until{" "}
-            {request.certificate.validUntil.toLocaleDateString("en-PH", {
-              dateStyle: "long",
-            })}
+            Valid until {formatManilaDate(request.certificate.validUntil)}
             {expired ? " — expired" : ""}
           </p>
           <StatusBadge value={request.status} />

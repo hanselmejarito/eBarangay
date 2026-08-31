@@ -7,6 +7,7 @@ import { fileUrl } from "@/lib/files";
 import { deleteBudgetExpenseFormAction } from "@/features/budget/actions";
 import { SubmitButton } from "@/components/submit-button";
 import { EmptyState } from "@/components/empty-state";
+import { FeedbackForm } from "@/components/feedback-form";
 
 export default async function BudgetLineDetailPage({
   params,
@@ -64,11 +65,11 @@ export default async function BudgetLineDetailPage({
                     </a>
                   ) : null}
                 </div>
-                <form action={deleteBudgetExpenseFormAction}>
+                <FeedbackForm action={deleteBudgetExpenseFormAction}>
                   <input type="hidden" name="id" value={e.id} />
                   <input type="hidden" name="lineId" value={line.id} />
                   <SubmitButton variant="ghost">Delete</SubmitButton>
-                </form>
+                </FeedbackForm>
               </div>
             ))}
           </div>

@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { prisma } from "@/lib/prisma";
 import { PRIORITY_LABELS } from "@/lib/constants";
 import { deleteAnnouncementFormAction } from "@/features/announcements/actions";
+import { FeedbackForm } from "@/components/feedback-form";
 import { SubmitButton } from "@/components/submit-button";
 import { ListPagination } from "@/components/list-pagination";
 import { paginationFromSearch, paginationMeta } from "@/lib/pagination";
@@ -46,10 +47,10 @@ export default async function StaffAnnouncementsPage({
                   <Badge variant="outline">{PRIORITY_LABELS[a.priority]}</Badge>
                 </div>
               </div>
-              <form action={deleteAnnouncementFormAction}>
+              <FeedbackForm action={deleteAnnouncementFormAction}>
                 <input type="hidden" name="id" value={a.id} />
                 <SubmitButton variant="ghost">Delete</SubmitButton>
-              </form>
+              </FeedbackForm>
             </div>
           ))}
         </div>

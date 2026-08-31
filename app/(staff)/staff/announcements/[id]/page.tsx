@@ -3,12 +3,7 @@ import { AnnouncementForm } from "@/features/announcements/announcement-form";
 import { prisma } from "@/lib/prisma";
 import { fileUrl } from "@/lib/files";
 import { isLiveEmailConfigured } from "@/lib/notify";
-
-function localInput(d: Date | null) {
-  if (!d) return "";
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
+import { toManilaDateTimeLocal } from "@/lib/datetime";
 
 export default async function EditAnnouncementPage({
   params,
@@ -29,8 +24,8 @@ export default async function EditAnnouncementPage({
           title: item.title,
           content: item.content,
           priority: item.priority,
-          publishedAt: localInput(item.publishedAt),
-          expiresAt: localInput(item.expiresAt),
+          publishedAt: toManilaDateTimeLocal(item.publishedAt),
+          expiresAt: toManilaDateTimeLocal(item.expiresAt),
           coverUrl: fileUrl(item.coverPath),
         }}
       />

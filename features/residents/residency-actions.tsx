@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { SubmitButton } from "@/components/submit-button";
 import { NativeSelect } from "@/components/ui/native-select";
+import { FeedbackForm } from "@/components/feedback-form";
 
 export function ResidencyActions({
   id,
@@ -25,7 +26,7 @@ export function ResidencyActions({
   return (
     <div className="grid gap-4 rounded-lg border p-4 md:grid-cols-2">
       {deceased ? (
-        <form action={restoreLivingFormAction} className="space-y-2 md:col-span-2">
+        <FeedbackForm action={restoreLivingFormAction} className="space-y-2 md:col-span-2" showMessage>
           <input type="hidden" name="id" value={id} />
           <p className="font-medium">Marked deceased</p>
           <p className="text-xs text-muted-foreground">
@@ -33,11 +34,11 @@ export function ResidencyActions({
             Restore only if this was recorded by mistake.
           </p>
           <SubmitButton variant="outline">Restore as living</SubmitButton>
-        </form>
+        </FeedbackForm>
       ) : (
         <>
           {!movedOut ? (
-            <form action={moveOutResidentFormAction} className="space-y-2">
+            <FeedbackForm action={moveOutResidentFormAction} className="space-y-2" showMessage>
               <input type="hidden" name="id" value={id} />
               <p className="font-medium">Mark as moved out</p>
               <p className="text-xs text-muted-foreground">
@@ -52,14 +53,14 @@ export function ResidencyActions({
                 placeholder="Moved to another barangay, new address, etc."
               />
               <SubmitButton variant="destructive">Move out</SubmitButton>
-            </form>
+            </FeedbackForm>
           ) : (
             <p className="text-sm text-muted-foreground">
               This person is marked moved out. Transfer them below if they now live
               in another household in this barangay.
             </p>
           )}
-          <form action={transferResidentFormAction} className="space-y-2">
+          <FeedbackForm action={transferResidentFormAction} className="space-y-2" showMessage>
             <input type="hidden" name="id" value={id} />
             <p className="font-medium">{movedOut ? "Move in / transfer" : "Transfer household"}</p>
             <Label htmlFor="householdId">New household</Label>
@@ -82,8 +83,8 @@ export function ResidencyActions({
               <option value="BOARDER">Boarder / nakikitira</option>
             </NativeSelect>
             <SubmitButton>Save transfer</SubmitButton>
-          </form>
-          <form action={markDeceasedFormAction} className="space-y-2 md:col-span-2">
+          </FeedbackForm>
+          <FeedbackForm action={markDeceasedFormAction} className="space-y-2 md:col-span-2" showMessage>
             <input type="hidden" name="id" value={id} />
             <p className="font-medium">Mark as deceased</p>
             <p className="text-xs text-muted-foreground">
@@ -98,7 +99,7 @@ export function ResidencyActions({
               placeholder="Death certificate, family report, date and place if known"
             />
             <SubmitButton variant="destructive">Record death</SubmitButton>
-          </form>
+          </FeedbackForm>
         </>
       )}
     </div>

@@ -20,6 +20,7 @@ import {
   INVENTORY_CONDITION_LABELS,
 } from "@/lib/constants";
 import { deleteInventoryItemFormAction } from "@/features/inventory/actions";
+import { FeedbackForm } from "@/components/feedback-form";
 import { SubmitButton } from "@/components/submit-button";
 
 export default async function StaffInventoryPage({
@@ -156,10 +157,10 @@ export default async function StaffInventoryPage({
                       <Button variant="outline" size="sm" asChild>
                         <Link href={`/staff/inventory/${item.id}`}>Update</Link>
                       </Button>
-                      <form action={deleteInventoryItemFormAction}>
+                      <FeedbackForm action={deleteInventoryItemFormAction}>
                         <input type="hidden" name="id" value={item.id} />
                         <SubmitButton variant="ghost">Delete</SubmitButton>
-                      </form>
+                      </FeedbackForm>
                     </div>
                   </TableCell>
                 </TableRow>

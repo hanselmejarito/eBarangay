@@ -57,7 +57,7 @@ export function AnnouncementForm({
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="publishedAt">Publish date</Label>
+          <Label htmlFor="publishedAt">Publish date (Philippine time)</Label>
           <Input
             id="publishedAt"
             name="publishedAt"
@@ -66,7 +66,7 @@ export function AnnouncementForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="expiresAt">Expires</Label>
+          <Label htmlFor="expiresAt">Expires (Philippine time)</Label>
           <Input
             id="expiresAt"
             name="expiresAt"

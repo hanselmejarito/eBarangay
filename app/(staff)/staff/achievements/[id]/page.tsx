@@ -2,12 +2,7 @@ import { notFound } from "next/navigation";
 import { AchievementForm } from "@/features/achievements/achievement-form";
 import { getAchievementById } from "@/lib/achievement-sql";
 import { fileUrl } from "@/lib/files";
-
-function localInput(d: Date | null) {
-  if (!d) return "";
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
+import { toManilaDateInput, toManilaDateTimeLocal } from "@/lib/datetime";
 
 export default async function EditAchievementPage({
   params,
@@ -28,8 +23,8 @@ export default async function EditAchievementPage({
           description: item.description,
           category: item.category,
           awardedBy: item.awardedBy,
-          awardedAt: item.awardedAt.toISOString().slice(0, 10),
-          publishedAt: localInput(item.publishedAt),
+          awardedAt: toManilaDateInput(item.awardedAt),
+          publishedAt: toManilaDateTimeLocal(item.publishedAt),
           imageUrl: fileUrl(item.imagePath),
         }}
       />

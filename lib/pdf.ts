@@ -2,6 +2,7 @@ import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import type { DocumentType } from "@prisma/client";
 import { DOCUMENT_LABELS, formatResidentName } from "@/lib/constants";
 import { absUrl } from "@/lib/qr";
+import { formatManilaDate } from "@/lib/datetime";
 import QRCode from "qrcode";
 
 type CertificateInput = {
@@ -142,17 +143,17 @@ export async function buildCertificatePdf(input: CertificateInput) {
 
   body.push(
     "",
-    `Issued this ${input.issuedAt.toLocaleDateString("en-PH", {
+    `Issued this ${formatManilaDate(input.issuedAt, {
       day: "numeric",
       month: "long",
       year: "numeric",
-    })} at ${input.settings.barangayName}, ${input.settings.cityMunicipality}.`,
+    }) ?? ""} at ${input.settings.barangayName}, ${input.settings.cityMunicipality}.`,
     "",
-    `Valid until ${input.validUntil.toLocaleDateString("en-PH", {
+    `Valid until ${formatManilaDate(input.validUntil, {
       day: "numeric",
       month: "long",
       year: "numeric",
-    })} unless sooner revoked.`,
+    }) ?? ""} unless sooner revoked.`,
   );
 
   for (const para of body) {

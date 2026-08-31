@@ -8,6 +8,7 @@ import { paginationFromSearch, paginationMeta } from "@/lib/pagination";
 import { ACHIEVEMENT_LABELS } from "@/lib/constants";
 import { deleteAchievementFormAction } from "@/features/achievements/actions";
 import { SubmitButton } from "@/components/submit-button";
+import { FeedbackForm } from "@/components/feedback-form";
 
 export default async function StaffAchievementsPage({
   searchParams,
@@ -50,10 +51,10 @@ export default async function StaffAchievementsPage({
                   {a.awardedBy ? <span>· {a.awardedBy}</span> : null}
                 </div>
               </div>
-              <form action={deleteAchievementFormAction}>
+              <FeedbackForm action={deleteAchievementFormAction}>
                 <input type="hidden" name="id" value={a.id} />
                 <SubmitButton variant="ghost">Delete</SubmitButton>
-              </form>
+              </FeedbackForm>
             </div>
           ))}
         </div>

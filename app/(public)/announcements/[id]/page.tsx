@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { prisma } from "@/lib/prisma";
 import { PRIORITY_LABELS } from "@/lib/constants";
 import { fileUrl } from "@/lib/files";
+import { formatManilaDate } from "@/lib/datetime";
 
 export default async function AnnouncementDetailPage({
   params,
@@ -18,11 +19,7 @@ export default async function AnnouncementDetailPage({
       <Badge variant="outline">{PRIORITY_LABELS[item.priority]}</Badge>
       <h1 className="mt-3 font-serif text-3xl font-semibold">{item.title}</h1>
       <p className="mt-2 text-sm text-muted-foreground">
-        {item.publishedAt
-          ? item.publishedAt.toLocaleDateString("en-PH", {
-              dateStyle: "long",
-            })
-          : null}
+        {formatManilaDate(item.publishedAt)}
       </p>
       {item.coverPath ? (
         // eslint-disable-next-line @next/next/no-img-element

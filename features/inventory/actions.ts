@@ -70,5 +70,5 @@ export async function deleteInventoryItemAction(id: string): Promise<ActionState
 }
 
 export async function deleteInventoryItemFormAction(formData: FormData) {
-  await deleteInventoryItemAction(String(formData.get("id")));
+  return deleteInventoryItemAction(String(formData.get("id")));
 }
