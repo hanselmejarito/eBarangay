@@ -30,7 +30,7 @@ export default async function PortalLayout({
             triggerClassName="border bg-background shadow-sm"
           />
         </div>
-        <div className="flex-1 p-4 pt-16 md:p-6 md:pt-6">{children}</div>
+        <div className="flex-1 bg-muted/30 p-4 pt-16 md:p-8 md:pt-8">{children}</div>
       </div>
     </div>
   );

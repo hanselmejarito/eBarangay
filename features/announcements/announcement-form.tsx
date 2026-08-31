@@ -84,12 +84,11 @@ export function AnnouncementForm({
           className="mt-1 size-4"
         />
         <span>
-          Notify verified residents via the portal, their login email, and
-          contact number.
+          Notify verified residents by email
           <span className="mt-1 block text-xs text-muted-foreground">
             {liveEmail
-              ? "Portal inbox always works. Live email is on (Resend). Test sender only delivers to the Gmail on your Resend account until you verify a domain."
-              : "Portal inbox always works. Live Gmail is off — add RESEND_API_KEY to .env and restart the server. Demo logins like juan@ebarangay.local are not real inboxes."}
+              ? "Sends the announcement to each verified resident’s login email (Resend). Test sender only delivers to your Resend account Gmail until you verify a domain."
+              : "Live Gmail is off — add RESEND_API_KEY to .env and restart the server."}
           </span>
         </span>
       </label>

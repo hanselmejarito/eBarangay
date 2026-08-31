@@ -411,6 +411,5 @@ export async function updateMyContactAction(
     data: { contactNumber },
   });
   revalidatePath("/portal/profile");
-  revalidatePath("/portal/notices");
-  return { success: "Contact number updated. Hall notices can reach this number." };
+  return { success: "Contact number updated." };
 }

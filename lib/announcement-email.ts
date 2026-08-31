@@ -56,7 +56,7 @@ export type AnnouncementEmailInput = {
   publishedAt: Date | null;
   expiresAt: Date | null;
   hasCover: boolean;
-  portalUrl: string;
+  viewUrl: string;
 };
 
 export function announcementEmailText(input: AnnouncementEmailInput) {
@@ -78,9 +78,9 @@ export function announcementEmailText(input: AnnouncementEmailInput) {
     until ? `Until: ${until}` : "",
     "",
     input.content,
-    input.hasCover ? "A cover photo is included. Open the resident portal to view it." : "",
+    input.hasCover ? "A cover photo is included. Open the announcement page to view it." : "",
     "",
-    `Read the full notice in the resident portal: ${input.portalUrl}`,
+    `Read the announcement: ${input.viewUrl}`,
     "",
     `This message was sent by ${input.barangayName}. Please do not reply to this email.`,
     contact,
@@ -172,15 +172,15 @@ export function announcementEmailHtml(input: AnnouncementEmailInput) {
                 ${bodyHtml(input.content)}
                 ${
                   input.hasCover
-                    ? `<p style="margin:8px 0 0;font-size:13px;color:#5c6570;">A cover photo was added. Open the resident portal to view it.</p>`
+                    ? `<p style="margin:8px 0 0;font-size:13px;color:#5c6570;">A cover photo was added. Open the announcement page to view it.</p>`
                     : ""
                 }
               </td>
             </tr>
             <tr>
               <td align="center" style="padding:8px 32px 28px;">
-                <a href="${escapeHtml(input.portalUrl)}" style="display:inline-block;background:#0038A8;color:#ffffff;text-decoration:none;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:bold;padding:12px 22px;border-radius:6px;">
-                  Open full notice
+                <a href="${escapeHtml(input.viewUrl)}" style="display:inline-block;background:#0038A8;color:#ffffff;text-decoration:none;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:bold;padding:12px 22px;border-radius:6px;">
+                  Open announcement
                 </a>
               </td>
             </tr>

@@ -22,7 +22,7 @@ export function ContactForm({ contactNumber }: { contactNumber: string }) {
           required
         />
         <p className="text-xs text-muted-foreground">
-          Used for announcement SMS. Your login email is used for email notices.
+          Used if the hall sends SMS. Announcements go to your login email.
         </p>
       </div>
       <SubmitButton>Save contact</SubmitButton>

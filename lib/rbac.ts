@@ -2,12 +2,17 @@ import { redirect } from "next/navigation";
 import type { Role } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { ROLE_HOME } from "@/lib/constants";
 
 export async function getSessionUser() {
   const session = await auth();
   if (!session?.user?.id) return null;
   if (session.user.status === "SUSPENDED" || !session.user.id) return null;
   return session.user;
+}
+
+export function homePathForRole(role: Role) {
+  return ROLE_HOME[role];
 }
 
 export async function requireUser() {
@@ -19,7 +24,7 @@ export async function requireUser() {
 export async function requireRole(...roles: Role[]) {
   const user = await requireUser();
   if (!roles.includes(user.role)) {
-    redirect("/login");
+    redirect(homePathForRole(user.role));
   }
   return user;
 }

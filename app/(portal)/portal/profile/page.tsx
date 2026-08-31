@@ -24,7 +24,9 @@ export default async function ProfilePage() {
   const residency = await getResidencyFields(me.id);
 
   return (
-    <Card className="max-w-2xl">
+    <div className="max-w-2xl space-y-4">
+      <h1 className="font-serif text-2xl font-semibold">Profile</h1>
+      <Card>
       <CardHeader>
         <CardTitle>{formatResidentName(me)}</CardTitle>
       </CardHeader>
@@ -74,5 +76,6 @@ export default async function ProfilePage() {
         </div>
       </CardContent>
     </Card>
+    </div>
   );
 }

@@ -35,7 +35,7 @@ export default async function StaffLayout({
             {settings.barangayName}
           </p>
         </header>
-        <div className="flex-1 p-4 md:p-6">{children}</div>
+        <div className="flex-1 bg-muted/30 p-4 md:p-8">{children}</div>
       </div>
     </div>
   );

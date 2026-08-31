@@ -20,7 +20,10 @@ export function proxy(request: NextRequest) {
   }
 
   if ((pathname === "/login" || pathname === "/register") && loggedIn) {
-    return NextResponse.next();
+    const url = request.nextUrl.clone();
+    url.pathname = "/portal";
+    url.search = "";
+    return NextResponse.redirect(url);
   }
 
   return NextResponse.next();

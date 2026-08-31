@@ -56,39 +56,39 @@
 
 :root {
   color-scheme: light;
-  --background: #fffdf8;
-  --foreground: #121826;
+  --background: #f4f7fb;
+  --foreground: #0f172a;
   --card: #ffffff;
-  --card-foreground: #121826;
+  --card-foreground: #0f172a;
   --popover: #ffffff;
-  --popover-foreground: #121826;
+  --popover-foreground: #0f172a;
   --primary: #0038a8;
   --primary-foreground: #ffffff;
-  --secondary: #f4efe0;
-  --secondary-foreground: #121826;
-  --muted: #f6f1e4;
-  --muted-foreground: #5c6573;
+  --secondary: #e8eef8;
+  --secondary-foreground: #0f172a;
+  --muted: #eef2f7;
+  --muted-foreground: #64748b;
   --accent: #fff4c2;
   --accent-foreground: #0038a8;
   --destructive: #ce1126;
   --success: #0f7a3a;
   --warning: #fcd116;
-  --border: #e6e0d0;
-  --input: #e6e0d0;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
   --ring: #0038a8;
   --chart-1: #0038a8;
   --chart-2: #ce1126;
   --chart-3: #fcd116;
   --chart-4: #0f7a3a;
   --chart-5: #1d4ed8;
-  --radius: 0.625rem;
-  --sidebar: #00257a;
-  --sidebar-foreground: #f8fafc;
+  --radius: 0.85rem;
+  --sidebar: #061433;
+  --sidebar-foreground: #e8eef8;
   --sidebar-primary: #fcd116;
-  --sidebar-primary-foreground: #121826;
-  --sidebar-accent: #0038a8;
+  --sidebar-primary-foreground: #061433;
+  --sidebar-accent: #0c2a6b;
   --sidebar-accent-foreground: #fcd116;
-  --sidebar-border: rgb(255 255 255 / 12%);
+  --sidebar-border: rgb(255 255 255 / 10%);
   --sidebar-ring: #fcd116;
 }
 
@@ -134,7 +134,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
   }
   html {
     @apply font-sans;
@@ -142,12 +142,19 @@
   h1,
   h2,
   h3 {
-    letter-spacing: -0.03em;
+    letter-spacing: -0.04em;
+    font-weight: 650;
   }
   select option {
     background-color: var(--popover);
     color: var(--popover-foreground);
   }
+}
+
+.surface-grid {
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgb(0 56 168 / 12%), transparent),
+    linear-gradient(to bottom, transparent, var(--background));
 }
 
 @keyframes ph-sun-spin {

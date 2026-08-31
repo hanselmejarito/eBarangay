@@ -1,11 +1,8 @@
 import { notFound } from "next/navigation";
 import { AnnouncementForm } from "@/features/announcements/announcement-form";
-import { NotifyResidentsButton } from "@/features/announcements/notify-button";
 import { prisma } from "@/lib/prisma";
 import { fileUrl } from "@/lib/files";
-import { listNoticesForAnnouncement } from "@/lib/announcement-notice-sql";
 import { isLiveEmailConfigured } from "@/lib/notify";
-import { Badge } from "@/components/ui/badge";
 
 function localInput(d: Date | null) {
   if (!d) return "";
@@ -19,10 +16,7 @@ export default async function EditAnnouncementPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [item, notices] = await Promise.all([
-    prisma.announcement.findUnique({ where: { id } }),
-    listNoticesForAnnouncement(id),
-  ]);
+  const item = await prisma.announcement.findUnique({ where: { id } });
   if (!item) notFound();
 
   return (
@@ -40,47 +34,6 @@ export default async function EditAnnouncementPage({
           coverUrl: fileUrl(item.coverPath),
         }}
       />
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Recipients</h2>
-        <p className="text-sm text-muted-foreground">
-          Verified living residents with a login email and/or contact number.
-          {isLiveEmailConfigured()
-            ? " Email sent = arrived at Gmail. Recorded = Resend rejected it (often because the address is not your Resend account email, or it is a .local demo address)."
-            : " Status recorded means it was logged only — RESEND_API_KEY is not set, so nothing went to Gmail."}
-        </p>
-        {notices.length === 0 ? (
-          <NotifyResidentsButton id={item.id} />
-        ) : (
-          <div className="space-y-2">
-            {notices.map((n) => (
-              <div
-                key={n.id}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3 text-sm"
-              >
-                <p className="font-medium">
-                  {n.firstName} {n.lastName}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {n.email ? (
-                    <Badge variant="secondary">
-                      {n.email} · {n.emailStatus.toLowerCase()}
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline">No email</Badge>
-                  )}
-                  {n.mobile ? (
-                    <Badge variant="secondary">
-                      {n.mobile} · {n.smsStatus.toLowerCase()}
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline">No mobile</Badge>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
     </div>
   );
 }

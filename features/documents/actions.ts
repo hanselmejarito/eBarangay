@@ -327,14 +327,20 @@ export async function markPaymentAction(
   return { success: paid ? "Marked paid." : "Marked unpaid." };
 }
 
-export async function updateRequestStatusFormAction(formData: FormData) {
-  await updateRequestStatusAction(
+export async function updateRequestStatusFormAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  return updateRequestStatusAction(
     String(formData.get("id")),
     String(formData.get("status")) as RequestStatus,
     formData,
   );
 }
 
-export async function markPaymentFormAction(formData: FormData) {
-  await markPaymentAction(String(formData.get("id")), formData.get("paid") === "true");
+export async function markPaymentFormAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  return markPaymentAction(String(formData.get("id")), formData.get("paid") === "true");
 }

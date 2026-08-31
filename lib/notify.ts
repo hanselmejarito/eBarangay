@@ -1,9 +1,4 @@
 import {
-  insertAnnouncementNotice,
-  listAnnouncementRecipients,
-  type NoticeRecipient,
-} from "@/lib/announcement-notice-sql";
-import {
   announcementEmailHtml,
   announcementEmailSubject,
   announcementEmailText,
@@ -13,10 +8,35 @@ import { prisma } from "@/lib/prisma";
 
 type ChannelStatus = "SENT" | "RECORDED" | "SKIPPED";
 
+type Recipient = {
+  id: string;
+  email: string | null;
+  mobile: string | null;
+};
+
 const TEST_FROM = "Barangay Hall <onboarding@resend.dev>";
 
-function portalBaseUrl() {
+function appBaseUrl() {
   return (process.env.AUTH_URL ?? "http://localhost:3000").replace(/\/$/, "");
+}
+
+async function listAnnouncementRecipients() {
+  return prisma.$queryRaw<Recipient[]>`
+    SELECT
+      r.id,
+      u.email,
+      NULLIF(BTRIM(r."contactNumber"), '') AS mobile
+    FROM "Resident" r
+    LEFT JOIN "User" u ON u.id = r."userId"
+    WHERE r."verificationStatus"::text = 'VERIFIED'
+      AND r."lifeStatus"::text = 'ALIVE'
+      AND r."residencyStatus"::text = 'ACTIVE'
+      AND (
+        u.email IS NOT NULL
+        OR NULLIF(BTRIM(r."contactNumber"), '') IS NOT NULL
+      )
+    ORDER BY r."lastName" ASC, r."firstName" ASC
+  `;
 }
 
 async function sendEmail(
@@ -28,7 +48,7 @@ async function sendEmail(
   const key = process.env.RESEND_API_KEY?.trim();
   if (!key) {
     console.warn(
-      "Announcement email recorded only: set RESEND_API_KEY in .env and restart npm run dev.",
+      "Announcement email skipped: set RESEND_API_KEY in .env and restart npm run dev.",
     );
     return "RECORDED";
   }
@@ -91,9 +111,9 @@ export async function notifyResidentsOfAnnouncement(input: {
     getSettings(),
     prisma.announcement.findUnique({ where: { id: input.announcementId } }),
   ]);
-  if (!item) return { total: 0, email: 0, sms: 0, recipients: [] as NoticeRecipient[] };
+  if (!item) return { total: 0, email: 0, sms: 0 };
 
-  const portalUrl = `${portalBaseUrl()}/portal/notices`;
+  const viewUrl = `${appBaseUrl()}/announcements/${item.id}`;
   const emailInput = {
     barangayName: settings.barangayName,
     cityMunicipality: settings.cityMunicipality,
@@ -107,7 +127,7 @@ export async function notifyResidentsOfAnnouncement(input: {
     publishedAt: item.publishedAt,
     expiresAt: item.expiresAt,
     hasCover: Boolean(item.coverPath),
-    portalUrl,
+    viewUrl,
   };
   const subject = announcementEmailSubject(settings.barangayName, item.title);
   const text = announcementEmailText(emailInput);
@@ -123,20 +143,11 @@ export async function notifyResidentsOfAnnouncement(input: {
       ? await sendSms(r.mobile, item.title, item.content)
       : "SKIPPED";
 
-    if (emailStatus !== "SKIPPED") email += 1;
-    if (smsStatus !== "SKIPPED") sms += 1;
-
-    await insertAnnouncementNotice({
-      announcementId: input.announcementId,
-      residentId: r.id,
-      email: r.email,
-      mobile: r.mobile,
-      emailStatus,
-      smsStatus,
-    });
+    if (emailStatus === "SENT") email += 1;
+    if (smsStatus === "SENT") sms += 1;
   }
 
-  return { total: recipients.length, email, sms, recipients: recipients as NoticeRecipient[] };
+  return { total: recipients.length, email, sms };
 }
 
 export function isLiveEmailConfigured() {

@@ -24,7 +24,6 @@ import {
   Package,
   Wallet,
   KeyRound,
-  Inbox,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { logoutAction } from "@/features/auth/actions";
@@ -55,15 +54,43 @@ function isActiveNav(pathname: string, href: string, allHrefs: string[]) {
 
 function SidebarBrand({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
-    <div className="flex items-center gap-2 px-4 py-5">
-      <Landmark className="size-6 text-ph-gold" />
+    <div className="flex items-center gap-3 px-4 py-5">
+      <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-ph-gold text-sidebar">
+        <Landmark className="size-5" />
+      </div>
       <div className="min-w-0">
-        <p className="truncate text-sm font-semibold leading-tight">{title}</p>
+        <p className="truncate text-sm font-semibold leading-tight tracking-tight">{title}</p>
         {subtitle ? (
-          <p className="truncate text-xs text-sidebar-foreground/70">{subtitle}</p>
+          <p className="truncate text-xs text-sidebar-foreground/60">{subtitle}</p>
         ) : null}
       </div>
     </div>
+  );
+}
+
+function NavLink({
+  item,
+  active,
+  onNavigate,
+}: {
+  item: Item;
+  active: boolean;
+  onNavigate?: () => void;
+}) {
+  return (
+    <Link
+      href={item.href}
+      onClick={onNavigate}
+      className={cn(
+        "flex min-h-10 items-center gap-2.5 rounded-xl px-3 py-2 text-sm transition-colors",
+        active
+          ? "bg-white/10 font-medium text-ph-gold shadow-sm"
+          : "text-sidebar-foreground/80 hover:bg-white/5 hover:text-sidebar-foreground",
+      )}
+    >
+      <item.icon className={cn("size-4 shrink-0", active ? "text-ph-gold" : "opacity-80")} />
+      {item.label}
+    </Link>
   );
 }
 
@@ -80,41 +107,28 @@ function SidebarLinks({
   const allHrefs = [...items, ...(extra ?? [])].map((item) => item.href);
 
   return (
-    <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-3">
+    <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-3 py-2">
       {items.map((item) => (
-        <Link
+        <NavLink
           key={item.href}
-          href={item.href}
-          onClick={onNavigate}
-          className={cn(
-            "flex min-h-10 items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-sidebar-accent",
-            isActiveNav(pathname, item.href, allHrefs)
-              ? "bg-sidebar-accent font-medium text-ph-gold"
-              : "",
-          )}
-        >
-          <item.icon className="size-4 shrink-0" />
-          {item.label}
-        </Link>
+          item={item}
+          active={isActiveNav(pathname, item.href, allHrefs)}
+          onNavigate={onNavigate}
+        />
       ))}
       {extra?.length ? (
         <>
-          <Separator className="my-2 bg-sidebar-border" />
+          <Separator className="my-3 bg-sidebar-border" />
+          <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-sidebar-foreground/40">
+            Admin
+          </p>
           {extra.map((item) => (
-            <Link
+            <NavLink
               key={item.href}
-              href={item.href}
-              onClick={onNavigate}
-              className={cn(
-                "flex min-h-10 items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-sidebar-accent",
-                isActiveNav(pathname, item.href, allHrefs)
-                  ? "bg-sidebar-accent font-medium text-ph-gold"
-                  : "",
-              )}
-            >
-              <item.icon className="size-4 shrink-0" />
-              {item.label}
-            </Link>
+              item={item}
+              active={isActiveNav(pathname, item.href, allHrefs)}
+              onNavigate={onNavigate}
+            />
           ))}
         </>
       ) : null}
@@ -124,22 +138,22 @@ function SidebarLinks({
 
 function SidebarFooter() {
   return (
-    <div className="space-y-1 p-3">
+    <div className="space-y-1 border-t border-sidebar-border p-3">
       <ThemeToggle
         labeled
-        className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-ph-gold"
+        className="rounded-xl text-sidebar-foreground hover:bg-white/5 hover:text-ph-gold"
       />
       <form action={logoutAction}>
         <Button
           variant="ghost"
-          className="w-full justify-start gap-2 text-sidebar-foreground hover:bg-sidebar-accent hover:text-ph-gold"
+          className="w-full justify-start gap-2 rounded-xl text-sidebar-foreground hover:bg-white/5 hover:text-ph-gold"
           type="submit"
         >
           <LogOut className="size-4" />
           Sign out
         </Button>
       </form>
-      <p className="px-3 pt-2 text-[11px] leading-snug text-sidebar-foreground/55">
+      <p className="px-3 pt-2 text-[11px] leading-snug text-sidebar-foreground/45">
         Developed by Hansel Mejarito Jr.
       </p>
     </div>
@@ -158,9 +172,8 @@ export function AppSidebar({
   extra?: Item[];
 }) {
   return (
-    <aside className="hidden w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex">
+    <aside className="sticky top-0 hidden h-svh w-64 shrink-0 flex-col bg-sidebar text-sidebar-foreground md:flex">
       <SidebarBrand title={title} subtitle={subtitle} />
-      <Separator className="bg-sidebar-border" />
       <SidebarLinks items={items} extra={extra} />
       <SidebarFooter />
     </aside>
@@ -203,10 +216,11 @@ export function AppMobileNav({
         <SheetHeader className="sr-only">
           <SheetTitle>Menu</SheetTitle>
         </SheetHeader>
-        <SidebarBrand title={title} subtitle={subtitle} />
-        <Separator className="bg-sidebar-border" />
-        <SidebarLinks items={items} extra={extra} onNavigate={() => setOpen(false)} />
-        <SidebarFooter />
+        <div className="flex h-full flex-col">
+          <SidebarBrand title={title} subtitle={subtitle} />
+          <SidebarLinks items={items} extra={extra} onNavigate={() => setOpen(false)} />
+          <SidebarFooter />
+        </div>
       </SheetContent>
     </Sheet>
   );
@@ -236,7 +250,6 @@ export const adminNav: Item[] = [
 
 export const portalNav: Item[] = [
   { href: "/portal", label: "Home", icon: Home },
-  { href: "/portal/notices", label: "Notices", icon: Inbox },
   { href: "/portal/profile", label: "Profile", icon: Users },
   { href: "/portal/requests", label: "Documents", icon: FileText },
   { href: "/portal/complaints", label: "Complaints", icon: MessageSquareWarning },

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
   Sheet,
   SheetContent,
@@ -58,6 +59,9 @@ export function PublicMobileNav({
               {link.label}
             </Link>
           ))}
+          <div className="mt-4 border-t pt-3">
+            <ThemeToggle labeled className="w-full justify-start" />
+          </div>
         </nav>
       </SheetContent>
     </Sheet>

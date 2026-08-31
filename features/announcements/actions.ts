@@ -7,7 +7,6 @@ import { saveUpload } from "@/lib/files";
 import { announcementSchema } from "@/lib/validations";
 import { requireStaff } from "@/lib/rbac";
 import { notifyResidentsOfAnnouncement } from "@/lib/notify";
-import { announcementHasNotices } from "@/lib/announcement-notice-sql";
 import type { ActionState } from "@/features/auth/actions";
 
 export async function upsertAnnouncementAction(
@@ -54,17 +53,13 @@ export async function upsertAnnouncementAction(
   let notifyNote = "";
   if (shouldNotify) {
     try {
-      const already = await announcementHasNotices(row.id);
-      if (!already) {
-        const sent = await notifyResidentsOfAnnouncement({
-          announcementId: row.id,
-        });
-        notifyNote = ` Notified ${sent.total} residents (${sent.email} email, ${sent.sms} mobile).`;
-      }
+      const sent = await notifyResidentsOfAnnouncement({
+        announcementId: row.id,
+      });
+      notifyNote = ` Emailed ${sent.email} of ${sent.total} verified residents.`;
     } catch (error) {
-      console.error("Announcement notify failed:", error);
-      notifyNote =
-        " Announcement saved, but notice delivery failed. Apply the latest database migration, then use Notify residents.";
+      console.error("Announcement email failed:", error);
+      notifyNote = " Announcement saved, but email could not be sent.";
     }
   }
 
@@ -77,43 +72,10 @@ export async function upsertAnnouncementAction(
   revalidatePath("/staff/announcements");
   revalidatePath("/staff/announcements/" + row.id);
   revalidatePath("/announcements");
-  revalidatePath("/portal/notices");
+  revalidatePath("/");
   return {
     success: (id ? "Announcement updated." : "Announcement published.") + notifyNote,
   };
-}
-
-export async function sendAnnouncementNoticesAction(
-  announcementId: string,
-): Promise<ActionState> {
-  await requireStaff();
-  const item = await prisma.announcement.findUnique({
-    where: { id: announcementId },
-  });
-  if (!item) return { error: "Announcement not found." };
-  if (await announcementHasNotices(announcementId)) {
-    return { error: "Residents were already notified for this announcement." };
-  }
-  try {
-    const sent = await notifyResidentsOfAnnouncement({
-      announcementId,
-    });
-    revalidatePath(`/staff/announcements/${announcementId}`);
-    revalidatePath("/portal/notices");
-    return {
-      success: `Notified ${sent.total} residents (${sent.email} email, ${sent.sms} mobile).`,
-    };
-  } catch (error) {
-    console.error("Announcement notify failed:", error);
-    return {
-      error:
-        "Notice delivery failed. Apply the latest database migration, then try Notify residents again.",
-    };
-  }
-}
-
-export async function sendAnnouncementNoticesFormAction(formData: FormData) {
-  await sendAnnouncementNoticesAction(String(formData.get("id")));
 }
 
 export async function deleteAnnouncementAction(id: string): Promise<ActionState> {
@@ -127,6 +89,7 @@ export async function deleteAnnouncementAction(id: string): Promise<ActionState>
   });
   revalidatePath("/staff/announcements");
   revalidatePath("/announcements");
+  revalidatePath("/");
   return { success: "Announcement removed." };
 }
 
