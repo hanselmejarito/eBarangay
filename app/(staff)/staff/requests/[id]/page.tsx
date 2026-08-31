@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
@@ -11,10 +12,13 @@ import { listEligibleDocumentSubjects } from "@/lib/resident-sql";
 
 export default async function StaffRequestDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ edit?: string }>;
 }) {
   const { id } = await params;
+  const { edit } = await searchParams;
   const request = await prisma.documentRequest.findUnique({
     where: { id },
     include: {
@@ -26,13 +30,14 @@ export default async function StaffRequestDetailPage({
   if (!request) notFound();
 
   const canEdit = request.status === "PENDING" || request.status === "REJECTED";
-  const subjects = canEdit
+  const editing = canEdit && edit === "1";
+  const subjects = editing
     ? await listEligibleDocumentSubjects({
         ids: [request.subjectResidentId],
         take: 1,
       })
     : [];
-  const extra = canEdit
+  const extra = editing
     ? await listEligibleDocumentSubjects({ take: 80 })
     : [];
   const byId = new Map(extra.map((m) => [m.id, m]));
@@ -85,9 +90,16 @@ export default async function StaffRequestDetailPage({
               </a>
             </Button>
           ) : null}
+          {canEdit && !editing ? (
+            <Button variant="outline" asChild>
+              <Link href={`/staff/requests/${request.id}?edit=1`}>
+                {request.status === "REJECTED" ? "Revise and resubmit" : "Update"}
+              </Link>
+            </Button>
+          ) : null}
         </CardContent>
       </Card>
-      {canEdit ? (
+      {editing ? (
         <div className="space-y-2">
           <h2 className="font-semibold">
             {request.status === "REJECTED" ? "Revise and resubmit" : "Update request"}

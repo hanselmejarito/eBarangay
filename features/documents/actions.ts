@@ -101,7 +101,7 @@ export async function createDocumentRequestAction(
     entityId: request.id,
   });
   revalidatePath("/portal/requests");
-  return { success: "Request submitted." };
+  redirect(`/portal/requests/${request.id}`);
 }
 
 export async function createWalkInDocumentRequestAction(
@@ -211,11 +211,7 @@ export async function saveDocumentRequestAction(
   revalidatePath(`/portal/requests/${id}`);
   revalidatePath("/staff/requests");
   revalidatePath(`/staff/requests/${id}`);
-  return {
-    success: resubmitting
-      ? "Request revised and sent back to the hall for review."
-      : "Request updated.",
-  };
+  redirect(isStaff ? `/staff/requests/${id}` : `/portal/requests/${id}`);
 }
 
 export async function updateRequestStatusAction(

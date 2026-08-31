@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
@@ -11,11 +12,14 @@ import { DocumentRequestForm } from "@/features/documents/request-form";
 
 export default async function PortalRequestDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ edit?: string }>;
 }) {
   const user = await requireUser();
   const { id } = await params;
+  const { edit } = await searchParams;
   const request = await prisma.documentRequest.findUnique({
     where: { id },
     include: { subject: true, certificate: true },
@@ -38,6 +42,7 @@ export default async function PortalRequestDetailPage({
   }
 
   const canEdit = request.status === "PENDING" || request.status === "REJECTED";
+  const editing = canEdit && edit === "1";
 
   return (
     <div className="max-w-2xl space-y-4">
@@ -68,9 +73,16 @@ export default async function PortalRequestDetailPage({
               </a>
             </Button>
           ) : null}
+          {canEdit && !editing ? (
+            <Button variant="outline" asChild>
+              <Link href={`/portal/requests/${request.id}?edit=1`}>
+                {request.status === "REJECTED" ? "Revise and resubmit" : "Update"}
+              </Link>
+            </Button>
+          ) : null}
         </CardContent>
       </Card>
-      {canEdit ? (
+      {editing ? (
         <div className="space-y-2">
           <h2 className="font-semibold">
             {request.status === "REJECTED" ? "Revise and resubmit" : "Update request"}

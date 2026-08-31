@@ -91,13 +91,9 @@ export default async function StaffRequestsPage({
                 </TableCell>
                 <TableCell>{r.controlNumber ?? "—"}</TableCell>
                 <TableCell className="text-right">
-                  {r.status === "PENDING" ? (
+                  {r.status === "REJECTED" ? (
                     <Button variant="outline" size="sm" asChild>
-                      <Link href={`/staff/requests/${r.id}`}>Update</Link>
-                    </Button>
-                  ) : r.status === "REJECTED" ? (
-                    <Button variant="outline" size="sm" asChild>
-                      <Link href={`/staff/requests/${r.id}`}>Revise</Link>
+                      <Link href={`/staff/requests/${r.id}?edit=1`}>Revise</Link>
                     </Button>
                   ) : (
                     <Button variant="ghost" size="sm" asChild>
