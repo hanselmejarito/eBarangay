@@ -56,6 +56,7 @@ export default async function PortalRequestsPage({
               <TableHead>For</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Control no.</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -71,6 +72,21 @@ export default async function PortalRequestsPage({
                   <StatusBadge value={r.status} />
                 </TableCell>
                 <TableCell>{r.controlNumber ?? "—"}</TableCell>
+                <TableCell className="text-right">
+                  {r.status === "PENDING" ? (
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/portal/requests/${r.id}`}>Update</Link>
+                    </Button>
+                  ) : r.status === "REJECTED" ? (
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/portal/requests/${r.id}`}>Revise</Link>
+                    </Button>
+                  ) : (
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link href={`/portal/requests/${r.id}`}>View</Link>
+                    </Button>
+                  )}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import {
   createDocumentRequestAction,
   createWalkInDocumentRequestAction,
+  saveDocumentRequestAction,
 } from "@/features/documents/actions";
 import { DOCUMENT_LABELS } from "@/lib/constants";
 import { Input } from "@/components/ui/input";
@@ -22,18 +23,32 @@ export function DocumentRequestForm({
   members,
   defaultSubjectId,
   walkIn = false,
-  submitLabel = "Submit request",
+  requestId,
+  defaults,
+  submitLabel,
 }: {
   members: { id: string; name: string }[];
   defaultSubjectId: string;
   walkIn?: boolean;
+  requestId?: string;
+  defaults?: {
+    type?: string;
+    purpose?: string;
+    businessName?: string | null;
+    businessAddress?: string | null;
+    businessNature?: string | null;
+  };
   submitLabel?: string;
 }) {
-  const submit = walkIn
-    ? createWalkInDocumentRequestAction
-    : createDocumentRequestAction;
+  const submit = requestId
+    ? saveDocumentRequestAction.bind(null, requestId)
+    : walkIn
+      ? createWalkInDocumentRequestAction
+      : createDocumentRequestAction;
   const [state, action] = useActionState(submit as typeof createDocumentRequestAction, {});
-  const [type, setType] = useState<string>("BARANGAY_CLEARANCE");
+  const [type, setType] = useState<string>(defaults?.type ?? "BARANGAY_CLEARANCE");
+  const label =
+    submitLabel ?? (requestId ? "Save changes" : "Submit request");
 
   return (
     <form action={action} className="space-y-4">
@@ -47,9 +62,9 @@ export function DocumentRequestForm({
           value={type}
           onChange={(e) => setType(e.target.value)}
         >
-          {TYPES.map(([value, label]) => (
+          {TYPES.map(([value, lbl]) => (
             <option key={value} value={value}>
-              {label}
+              {lbl}
             </option>
           ))}
         </NativeSelect>
@@ -71,25 +86,46 @@ export function DocumentRequestForm({
       </div>
       <div className="space-y-2">
         <Label htmlFor="purpose">Purpose</Label>
-        <Textarea id="purpose" name="purpose" required rows={3} />
+        <Textarea
+          id="purpose"
+          name="purpose"
+          required
+          rows={3}
+          defaultValue={defaults?.purpose}
+        />
       </div>
       {type === "BUSINESS_CLEARANCE" ? (
         <>
           <div className="space-y-2">
             <Label htmlFor="businessName">Business name</Label>
-            <Input id="businessName" name="businessName" required />
+            <Input
+              id="businessName"
+              name="businessName"
+              required
+              defaultValue={defaults?.businessName ?? ""}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="businessAddress">Business address</Label>
-            <Input id="businessAddress" name="businessAddress" required />
+            <Input
+              id="businessAddress"
+              name="businessAddress"
+              required
+              defaultValue={defaults?.businessAddress ?? ""}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="businessNature">Nature of business</Label>
-            <Input id="businessNature" name="businessNature" required />
+            <Input
+              id="businessNature"
+              name="businessNature"
+              required
+              defaultValue={defaults?.businessNature ?? ""}
+            />
           </div>
         </>
       ) : null}
-      <SubmitButton>{submitLabel}</SubmitButton>
+      <SubmitButton>{label}</SubmitButton>
     </form>
   );
 }

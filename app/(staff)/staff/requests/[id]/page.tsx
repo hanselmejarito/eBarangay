@@ -3,9 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { ProcessForm } from "@/features/documents/process-form";
+import { DocumentRequestForm } from "@/features/documents/request-form";
 import { prisma } from "@/lib/prisma";
 import { DOCUMENT_LABELS, formatResidentName, pesos } from "@/lib/constants";
 import { fileUrl } from "@/lib/files";
+import { listEligibleDocumentSubjects } from "@/lib/resident-sql";
 
 export default async function StaffRequestDetailPage({
   params,
@@ -22,6 +24,29 @@ export default async function StaffRequestDetailPage({
     },
   });
   if (!request) notFound();
+
+  const canEdit = request.status === "PENDING" || request.status === "REJECTED";
+  const subjects = canEdit
+    ? await listEligibleDocumentSubjects({
+        ids: [request.subjectResidentId],
+        take: 1,
+      })
+    : [];
+  const extra = canEdit
+    ? await listEligibleDocumentSubjects({ take: 80 })
+    : [];
+  const byId = new Map(extra.map((m) => [m.id, m]));
+  for (const row of subjects) byId.set(row.id, row);
+  const members = [...byId.values()].map((m) => ({
+    id: m.id,
+    name: `${formatResidentName(m)} · ${m.householdNumber} · ${m.purok}`,
+  }));
+  if (!members.some((m) => m.id === request.subjectResidentId)) {
+    members.unshift({
+      id: request.subject.id,
+      name: formatResidentName(request.subject),
+    });
+  }
 
   return (
     <div className="max-w-2xl space-y-4">
@@ -50,6 +75,9 @@ export default async function StaffRequestDetailPage({
           <p>Fee: {pesos(request.feeAmount)}</p>
           <StatusBadge value={request.paymentStatus} />
           {request.controlNumber ? <p>Control no. {request.controlNumber}</p> : null}
+          {request.rejectionReason ? (
+            <p className="text-destructive">Reason: {request.rejectionReason}</p>
+          ) : null}
           {request.certificate ? (
             <Button asChild>
               <a href={fileUrl(request.certificate.pdfPath) ?? "#"} target="_blank">
@@ -59,7 +87,31 @@ export default async function StaffRequestDetailPage({
           ) : null}
         </CardContent>
       </Card>
-      <ProcessForm id={request.id} status={request.status} type={request.type} />
+      {canEdit ? (
+        <div className="space-y-2">
+          <h2 className="font-semibold">
+            {request.status === "REJECTED" ? "Revise and resubmit" : "Update request"}
+          </h2>
+          <DocumentRequestForm
+            members={members}
+            defaultSubjectId={request.subjectResidentId}
+            requestId={request.id}
+            defaults={{
+              type: request.type,
+              purpose: request.purpose,
+              businessName: request.businessName,
+              businessAddress: request.businessAddress,
+              businessNature: request.businessNature,
+            }}
+            submitLabel={
+              request.status === "REJECTED" ? "Revise and resubmit" : "Save changes"
+            }
+          />
+        </div>
+      ) : null}
+      {request.status !== "REJECTED" ? (
+        <ProcessForm id={request.id} status={request.status} type={request.type} />
+      ) : null}
     </div>
   );
 }

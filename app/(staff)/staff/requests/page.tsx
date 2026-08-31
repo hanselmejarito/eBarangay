@@ -68,6 +68,7 @@ export default async function StaffRequestsPage({
               <TableHead>Status</TableHead>
               <TableHead>Payment</TableHead>
               <TableHead>Control no.</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -89,6 +90,21 @@ export default async function StaffRequestsPage({
                   <StatusBadge value={r.paymentStatus} />
                 </TableCell>
                 <TableCell>{r.controlNumber ?? "—"}</TableCell>
+                <TableCell className="text-right">
+                  {r.status === "PENDING" ? (
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/staff/requests/${r.id}`}>Update</Link>
+                    </Button>
+                  ) : r.status === "REJECTED" ? (
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/staff/requests/${r.id}`}>Revise</Link>
+                    </Button>
+                  ) : (
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link href={`/staff/requests/${r.id}`}>View</Link>
+                    </Button>
+                  )}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

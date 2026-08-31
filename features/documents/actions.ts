@@ -142,6 +142,82 @@ export async function createWalkInDocumentRequestAction(
   redirect(`/staff/requests/${request.id}`);
 }
 
+export async function saveDocumentRequestAction(
+  id: string,
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const user = await requireUser();
+  const existing = await prisma.documentRequest.findUnique({ where: { id } });
+  if (!existing) return { error: "Request not found." };
+
+  if (existing.status === "REVIEWING") {
+    return { error: "This request is under review and cannot be changed." };
+  }
+  if (existing.status === "APPROVED" || existing.status === "RELEASED") {
+    return { error: "Issued requests cannot be edited. File a new request if needed." };
+  }
+  if (existing.status !== "PENDING" && existing.status !== "REJECTED") {
+    return { error: "This request cannot be changed." };
+  }
+
+  const isStaff = user.role === "STAFF" || user.role === "ADMIN";
+  if (!isStaff) {
+    if (user.role !== "RESIDENT" || user.status !== "ACTIVE") {
+      return { error: "Your account must be verified before updating requests." };
+    }
+    if (existing.requestedByUserId !== user.id) {
+      return { error: "You can only update your own requests." };
+    }
+  }
+
+  const parsed = parseRequestForm(formData);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid request" };
+  }
+
+  if (!isStaff) {
+    const allowed = await assertHouseholdAccess(user.id, parsed.data.subjectResidentId);
+    if (!allowed) return { error: "You can only request for your household." };
+  }
+
+  const eligible = await assertEligibleDocumentSubject(parsed.data.subjectResidentId);
+  if (eligible.error) return { error: eligible.error };
+
+  const settings = await getSettings();
+  const resubmitting = existing.status === "REJECTED";
+
+  await prisma.documentRequest.update({
+    where: { id },
+    data: {
+      type: parsed.data.type,
+      purpose: parsed.data.purpose,
+      subjectResidentId: parsed.data.subjectResidentId,
+      businessName: parsed.data.businessName ?? null,
+      businessAddress: parsed.data.businessAddress ?? null,
+      businessNature: parsed.data.businessNature ?? null,
+      feeAmount: feeForType(settings, parsed.data.type),
+      status: "PENDING",
+    },
+  });
+
+  await writeAudit({
+    actorId: user.id,
+    action: resubmitting ? "RESUBMIT_DOCUMENT_REQUEST" : "UPDATE_DOCUMENT_REQUEST",
+    entityType: "DocumentRequest",
+    entityId: id,
+  });
+  revalidatePath("/portal/requests");
+  revalidatePath(`/portal/requests/${id}`);
+  revalidatePath("/staff/requests");
+  revalidatePath(`/staff/requests/${id}`);
+  return {
+    success: resubmitting
+      ? "Request revised and sent back to the hall for review."
+      : "Request updated.",
+  };
+}
+
 export async function updateRequestStatusAction(
   id: string,
   status: RequestStatus,
