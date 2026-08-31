@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { connection } from "next/server";
 import { ArrowRight, FileText, IdCard, Megaphone, ShieldCheck, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +13,7 @@ import { fileUrl } from "@/lib/files";
 import { EmptyState } from "@/components/empty-state";
 
 export default async function HomePage() {
+  await connection();
   const settings = await getSettings();
   const [announcements, achievements, officials] = await Promise.all([
     prisma.announcement.findMany({

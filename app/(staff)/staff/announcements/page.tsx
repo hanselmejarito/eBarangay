@@ -9,6 +9,7 @@ import { FeedbackForm } from "@/components/feedback-form";
 import { SubmitButton } from "@/components/submit-button";
 import { ListPagination } from "@/components/list-pagination";
 import { paginationFromSearch, paginationMeta } from "@/lib/pagination";
+import { formatManilaDateTime, publishStatus } from "@/lib/datetime";
 
 export default async function StaffAnnouncementsPage({
   searchParams,
@@ -37,14 +38,24 @@ export default async function StaffAnnouncementsPage({
         <EmptyState title="No announcements" />
       ) : (
         <div className="space-y-2">
-          {rows.map((a) => (
+          {rows.map((a) => {
+              const visibility = publishStatus(a.publishedAt, a.expiresAt);
+              return (
             <div key={a.id} className="flex items-center justify-between rounded-lg border p-3">
               <div>
                 <Link href={`/staff/announcements/${a.id}`} className="font-medium text-primary">
                   {a.title}
                 </Link>
-                <div className="mt-1">
+                <div className="mt-1 flex flex-wrap items-center gap-2">
                   <Badge variant="outline">{PRIORITY_LABELS[a.priority]}</Badge>
+                  {visibility === "scheduled" ? (
+                    <Badge variant="secondary">
+                      Scheduled {formatManilaDateTime(a.publishedAt)}
+                    </Badge>
+                  ) : null}
+                  {visibility === "expired" ? (
+                    <Badge variant="secondary">Expired</Badge>
+                  ) : null}
                 </div>
               </div>
               <FeedbackForm action={deleteAnnouncementFormAction}>
@@ -52,7 +63,8 @@ export default async function StaffAnnouncementsPage({
                 <SubmitButton variant="ghost">Delete</SubmitButton>
               </FeedbackForm>
             </div>
-          ))}
+              );
+            })}
         </div>
       )}
       <ListPagination

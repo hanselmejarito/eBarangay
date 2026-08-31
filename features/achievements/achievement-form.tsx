@@ -92,6 +92,9 @@ export function AchievementForm({
             type="datetime-local"
             defaultValue={defaults?.publishedAt}
           />
+          <p className="text-xs text-muted-foreground">
+            Future dates stay off the public awards list until that time.
+          </p>
         </div>
       </div>
       <ImageField

@@ -3,10 +3,12 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/empty-state";
 import { listPublishedAchievements } from "@/lib/achievement-sql";
+import { connection } from "next/server";
 import { ACHIEVEMENT_LABELS } from "@/lib/constants";
 import { fileUrl } from "@/lib/files";
 
 export default async function AchievementsPage() {
+  await connection();
   const items = await listPublishedAchievements();
 
   return (

@@ -8,7 +8,7 @@ import { announcementSchema } from "@/lib/validations";
 import { requireStaff } from "@/lib/rbac";
 import { notifyResidentsOfAnnouncement } from "@/lib/notify";
 import type { ActionState } from "@/features/auth/actions";
-import { parseManilaDateTime } from "@/lib/datetime";
+import { parseManilaDateTime, formatManilaDateTime, publishStatus } from "@/lib/datetime";
 
 export async function upsertAnnouncementAction(
   id: string | null,
@@ -42,6 +42,17 @@ export async function upsertAnnouncementAction(
     ...(coverPath ? { coverPath } : {}),
   };
 
+  const now = Date.now();
+  if (!id && data.publishedAt.getTime() < now - 60_000) {
+    return { error: "Publish date cannot be in the past. Use now, or a future time to schedule." };
+  }
+  if (data.expiresAt && data.expiresAt.getTime() <= data.publishedAt.getTime()) {
+    return { error: "Expiration must be after the publish date." };
+  }
+  if (data.expiresAt && data.expiresAt.getTime() < now - 60_000) {
+    return { error: "Expiration cannot be in the past." };
+  }
+
   const row = id
     ? await prisma.announcement.update({ where: { id }, data })
     : await prisma.announcement.create({
@@ -49,8 +60,13 @@ export async function upsertAnnouncementAction(
       });
 
   const shouldNotify = formData.get("notifyResidents") === "on";
+  const status = publishStatus(data.publishedAt, data.expiresAt);
   let notifyNote = "";
-  if (shouldNotify) {
+  if (shouldNotify && status === "scheduled") {
+    notifyNote = ` Email was not sent — still scheduled until ${formatManilaDateTime(data.publishedAt)}. Check notify again after it goes live.`;
+  } else if (shouldNotify && status === "expired") {
+    notifyNote = " Email was not sent because this notice is already expired.";
+  } else if (shouldNotify) {
     try {
       const sent = await notifyResidentsOfAnnouncement({
         announcementId: row.id,
@@ -71,10 +87,17 @@ export async function upsertAnnouncementAction(
   revalidatePath("/staff/announcements");
   revalidatePath("/staff/announcements/" + row.id);
   revalidatePath("/announcements");
-  revalidatePath("/");
-  return {
-    success: (id ? "Announcement updated." : "Announcement published.") + notifyNote,
-  };
+  revalidatePath("/", "layout");
+
+  const saved =
+    status === "scheduled"
+      ? `Saved. Goes live ${formatManilaDateTime(data.publishedAt)} — not on the homepage until then.`
+      : status === "expired"
+        ? "Saved, but this notice is past its expiry so it stays off the public site."
+        : id
+          ? "Announcement updated."
+          : "Announcement published.";
+  return { success: saved + notifyNote };
 }
 
 export async function deleteAnnouncementAction(id: string): Promise<ActionState> {
@@ -88,7 +111,7 @@ export async function deleteAnnouncementAction(id: string): Promise<ActionState>
   });
   revalidatePath("/staff/announcements");
   revalidatePath("/announcements");
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   return { success: "Announcement removed." };
 }
 

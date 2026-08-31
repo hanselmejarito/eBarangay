@@ -193,8 +193,9 @@ Staff write title, message, optional cover, priority (normal / high / urgent), p
 If **Notify verified residents by email** is checked:
 
 - Recipients are **verified, living, active** residents who have an account email (and optionally a mobile for SMS).
-- Email is sent through [Resend](https://resend.com) when `RESEND_API_KEY` is set.
-- Without the key, the announcement is still published; email is skipped.
+- Email is sent through [Resend](https://resend.com) when `RESEND_API_KEY` is set, **and only if the notice is already live** (publish date is now or past, not expired).
+- A future publish date hides the notice from the public site **and skips email**. After it goes live, open it again and check notify to send.
+- Without the key, the announcement is still saved; email is skipped.
 
 **Resend test mode:** the default sender `onboarding@resend.dev` can only deliver to the email of the Resend account. To reach every resident Gmail, verify a domain in Resend and set `ANNOUNCE_FROM_EMAIL` to an address on that domain.
 

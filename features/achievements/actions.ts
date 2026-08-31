@@ -60,7 +60,7 @@ export async function upsertAchievementAction(
   });
   revalidatePath("/staff/achievements");
   revalidatePath("/achievements");
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   return { success: id ? "Achievement updated." : "Achievement published." };
 }
 
@@ -75,7 +75,7 @@ export async function deleteAchievementAction(id: string): Promise<ActionState> 
   });
   revalidatePath("/staff/achievements");
   revalidatePath("/achievements");
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   return { success: "Achievement removed." };
 }
 

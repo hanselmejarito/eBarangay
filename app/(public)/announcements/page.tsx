@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { connection } from "next/server";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/empty-state";
@@ -7,6 +8,7 @@ import { PRIORITY_LABELS } from "@/lib/constants";
 import { fileUrl } from "@/lib/files";
 
 export default async function AnnouncementsPage() {
+  await connection();
   const items = await prisma.announcement.findMany({
     where: {
       publishedAt: { lte: new Date() },

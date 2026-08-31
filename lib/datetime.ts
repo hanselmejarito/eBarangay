@@ -69,6 +69,19 @@ export function toManilaDateTimeLocal(value: Date | null | undefined) {
   return `${part(parts, "year")}-${part(parts, "month")}-${part(parts, "day")}T${part(parts, "hour")}:${part(parts, "minute")}`;
 }
 
+function laterDateTimeLocal(a: string, b: string) {
+  if (!a) return b;
+  if (!b) return a;
+  return a > b ? a : b;
+}
+
+export function announcementExpiresMin(
+  publishedLocal: string | undefined,
+  nowLocal = toManilaDateTimeLocal(new Date()),
+) {
+  return laterDateTimeLocal(publishedLocal ?? "", nowLocal);
+}
+
 export function toManilaDateInput(value: Date | null | undefined) {
   if (!value) return "";
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -98,4 +111,14 @@ export function formatManilaDate(
     timeZone: HALL_TIME_ZONE,
     ...options,
   });
+}
+
+export function publishStatus(
+  publishedAt: Date | null | undefined,
+  expiresAt: Date | null | undefined,
+  now = new Date(),
+) {
+  if (publishedAt && publishedAt.getTime() > now.getTime()) return "scheduled" as const;
+  if (expiresAt && expiresAt.getTime() < now.getTime()) return "expired" as const;
+  return "live" as const;
 }
