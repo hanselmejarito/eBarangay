@@ -4,6 +4,7 @@ import { NotifyResidentsButton } from "@/features/announcements/notify-button";
 import { prisma } from "@/lib/prisma";
 import { fileUrl } from "@/lib/files";
 import { listNoticesForAnnouncement } from "@/lib/announcement-notice-sql";
+import { isLiveEmailConfigured } from "@/lib/notify";
 import { Badge } from "@/components/ui/badge";
 
 function localInput(d: Date | null) {
@@ -29,6 +30,7 @@ export default async function EditAnnouncementPage({
       <h1 className="font-serif text-2xl font-semibold">Edit announcement</h1>
       <AnnouncementForm
         id={item.id}
+        liveEmail={isLiveEmailConfigured()}
         defaults={{
           title: item.title,
           content: item.content,
@@ -42,6 +44,9 @@ export default async function EditAnnouncementPage({
         <h2 className="text-lg font-semibold">Recipients</h2>
         <p className="text-sm text-muted-foreground">
           Verified living residents with a login email and/or contact number.
+          {isLiveEmailConfigured()
+            ? " Email sent = arrived at Gmail. Recorded = Resend rejected it (often because the address is not your Resend account email, or it is a .local demo address)."
+            : " Status recorded means it was logged only — RESEND_API_KEY is not set, so nothing went to Gmail."}
         </p>
         {notices.length === 0 ? (
           <NotifyResidentsButton id={item.id} />

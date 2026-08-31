@@ -60,7 +60,8 @@ export async function insertAnnouncementNotice(data: {
   smsStatus: string;
 }) {
   const id = randomUUID();
-  await prisma.$executeRaw`
+  try {
+    await prisma.$executeRaw`
     INSERT INTO "AnnouncementNotice" (
       id, "announcementId", "residentId", email, mobile,
       "emailStatus", "smsStatus", "createdAt"
@@ -77,6 +78,15 @@ export async function insertAnnouncementNotice(data: {
     )
     ON CONFLICT ("announcementId", "residentId") DO NOTHING
   `;
+  } catch (error) {
+    if (missingNoticeTable(error)) {
+      console.error(
+        "AnnouncementNotice table is missing. Run: npx prisma migrate deploy",
+      );
+      return id;
+    }
+    throw error;
+  }
   return id;
 }
 
@@ -170,11 +180,16 @@ export async function countUnreadNotices(residentId: string) {
 }
 
 export async function markNoticeRead(id: string, residentId: string) {
-  await prisma.$executeRaw`
+  try {
+    await prisma.$executeRaw`
     UPDATE "AnnouncementNotice"
     SET "readAt" = NOW()
     WHERE id = ${id} AND "residentId" = ${residentId} AND "readAt" IS NULL
   `;
+  } catch (error) {
+    if (missingNoticeTable(error)) return;
+    throw error;
+  }
 }
 
 export async function announcementHasNotices(announcementId: string) {

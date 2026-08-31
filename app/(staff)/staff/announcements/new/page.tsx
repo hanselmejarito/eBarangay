@@ -1,10 +1,11 @@
 import { AnnouncementForm } from "@/features/announcements/announcement-form";
+import { isLiveEmailConfigured } from "@/lib/notify";
 
 export default function NewAnnouncementPage() {
   return (
     <div className="space-y-4">
       <h1 className="font-serif text-2xl font-semibold">New announcement</h1>
-      <AnnouncementForm />
+      <AnnouncementForm liveEmail={isLiveEmailConfigured()} />
     </div>
   );
 }

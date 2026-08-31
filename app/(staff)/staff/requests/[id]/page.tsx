@@ -122,7 +122,7 @@ export default async function StaffRequestDetailPage({
         </div>
       ) : null}
       {request.status !== "REJECTED" ? (
-        <ProcessForm id={request.id} status={request.status} type={request.type} />
+        <ProcessForm id={request.id} status={request.status} />
       ) : null}
     </div>
   );

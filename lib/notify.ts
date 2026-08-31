@@ -3,13 +3,36 @@ import {
   listAnnouncementRecipients,
   type NoticeRecipient,
 } from "@/lib/announcement-notice-sql";
+import {
+  announcementEmailHtml,
+  announcementEmailSubject,
+  announcementEmailText,
+} from "@/lib/announcement-email";
+import { getSettings } from "@/lib/settings";
+import { prisma } from "@/lib/prisma";
 
 type ChannelStatus = "SENT" | "RECORDED" | "SKIPPED";
 
-async function sendEmail(to: string, title: string, content: string): Promise<ChannelStatus> {
-  const key = process.env.RESEND_API_KEY;
-  const from = process.env.ANNOUNCE_FROM_EMAIL;
-  if (!key || !from) return "RECORDED";
+const TEST_FROM = "Barangay Hall <onboarding@resend.dev>";
+
+function portalBaseUrl() {
+  return (process.env.AUTH_URL ?? "http://localhost:3000").replace(/\/$/, "");
+}
+
+async function sendEmail(
+  to: string,
+  subject: string,
+  text: string,
+  html: string,
+): Promise<ChannelStatus> {
+  const key = process.env.RESEND_API_KEY?.trim();
+  if (!key) {
+    console.warn(
+      "Announcement email recorded only: set RESEND_API_KEY in .env and restart npm run dev.",
+    );
+    return "RECORDED";
+  }
+  const from = process.env.ANNOUNCE_FROM_EMAIL?.trim() || TEST_FROM;
 
   try {
     const res = await fetch("https://api.resend.com/emails", {
@@ -21,12 +44,19 @@ async function sendEmail(to: string, title: string, content: string): Promise<Ch
       body: JSON.stringify({
         from,
         to: [to],
-        subject: title,
-        text: content,
+        subject,
+        text,
+        html,
       }),
     });
-    return res.ok ? "SENT" : "RECORDED";
-  } catch {
+    if (!res.ok) {
+      const detail = await res.text().catch(() => "");
+      console.error(`Resend failed for ${to}: ${res.status} ${detail}`);
+      return "RECORDED";
+    }
+    return "SENT";
+  } catch (err) {
+    console.error(`Resend failed for ${to}:`, err);
     return "RECORDED";
   }
 }
@@ -55,19 +85,42 @@ async function sendSms(to: string, title: string, content: string): Promise<Chan
 
 export async function notifyResidentsOfAnnouncement(input: {
   announcementId: string;
-  title: string;
-  content: string;
 }) {
-  const recipients = await listAnnouncementRecipients();
+  const [recipients, settings, item] = await Promise.all([
+    listAnnouncementRecipients(),
+    getSettings(),
+    prisma.announcement.findUnique({ where: { id: input.announcementId } }),
+  ]);
+  if (!item) return { total: 0, email: 0, sms: 0, recipients: [] as NoticeRecipient[] };
+
+  const portalUrl = `${portalBaseUrl()}/portal/notices`;
+  const emailInput = {
+    barangayName: settings.barangayName,
+    cityMunicipality: settings.cityMunicipality,
+    province: settings.province,
+    address: settings.address,
+    contactNumber: settings.contactNumber,
+    captainName: settings.captainName,
+    title: item.title,
+    content: item.content,
+    priority: item.priority,
+    publishedAt: item.publishedAt,
+    expiresAt: item.expiresAt,
+    hasCover: Boolean(item.coverPath),
+    portalUrl,
+  };
+  const subject = announcementEmailSubject(settings.barangayName, item.title);
+  const text = announcementEmailText(emailInput);
+  const html = announcementEmailHtml(emailInput);
   let email = 0;
   let sms = 0;
 
   for (const r of recipients) {
     const emailStatus = r.email
-      ? await sendEmail(r.email, input.title, input.content)
+      ? await sendEmail(r.email, subject, text, html)
       : "SKIPPED";
     const smsStatus = r.mobile
-      ? await sendSms(r.mobile, input.title, input.content)
+      ? await sendSms(r.mobile, item.title, item.content)
       : "SKIPPED";
 
     if (emailStatus !== "SKIPPED") email += 1;
@@ -84,4 +137,8 @@ export async function notifyResidentsOfAnnouncement(input: {
   }
 
   return { total: recipients.length, email, sms, recipients: recipients as NoticeRecipient[] };
+}
+
+export function isLiveEmailConfigured() {
+  return Boolean(process.env.RESEND_API_KEY?.trim());
 }

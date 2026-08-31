@@ -13,6 +13,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 export function AnnouncementForm({
   id,
   defaults,
+  liveEmail = false,
 }: {
   id?: string;
   defaults?: {
@@ -23,6 +24,7 @@ export function AnnouncementForm({
     expiresAt?: string;
     coverUrl?: string | null;
   };
+  liveEmail?: boolean;
 }) {
   const [state, action] = useActionState(
     upsertAnnouncementAction.bind(null, id ?? null),
@@ -85,8 +87,9 @@ export function AnnouncementForm({
           Notify verified residents via the portal, their login email, and
           contact number.
           <span className="mt-1 block text-xs text-muted-foreground">
-            Portal inbox always works. Live email/SMS need provider keys. Without
-            them, delivery is recorded against their email and mobile.
+            {liveEmail
+              ? "Portal inbox always works. Live email is on (Resend). Test sender only delivers to the Gmail on your Resend account until you verify a domain."
+              : "Portal inbox always works. Live Gmail is off — add RESEND_API_KEY to .env and restart the server. Demo logins like juan@ebarangay.local are not real inboxes."}
           </span>
         </span>
       </label>

@@ -232,23 +232,9 @@ export async function updateRequestStatusAction(
   const rejectionReason = formData?.get("rejectionReason")
     ? String(formData.get("rejectionReason"))
     : undefined;
-  const indigencyNote = formData?.get("indigencyNote")
-    ? String(formData.get("indigencyNote"))
-    : undefined;
-  const staffNotes = formData?.get("staffNotes")
-    ? String(formData.get("staffNotes"))
-    : undefined;
 
   if (status === "REJECTED" && !rejectionReason) {
     return { error: "Provide a rejection reason." };
-  }
-  if (
-    status === "APPROVED" &&
-    existing.type === "CERTIFICATE_OF_INDIGENCY" &&
-    !indigencyNote &&
-    !existing.indigencyNote
-  ) {
-    return { error: "Add an indigency confirmation note before approving." };
   }
 
   if (status === "APPROVED" && !existing.certificate) {
@@ -286,8 +272,6 @@ export async function updateRequestStatusAction(
       data: {
         status: "APPROVED",
         controlNumber,
-        indigencyNote: indigencyNote ?? existing.indigencyNote,
-        staffNotes: staffNotes ?? existing.staffNotes,
         processedById: staff.id,
         certificate: {
           create: {
@@ -306,8 +290,6 @@ export async function updateRequestStatusAction(
       data: {
         status,
         rejectionReason: status === "REJECTED" ? rejectionReason : existing.rejectionReason,
-        indigencyNote: indigencyNote ?? existing.indigencyNote,
-        staffNotes: staffNotes ?? existing.staffNotes,
         processedById: staff.id,
         releasedAt: status === "RELEASED" ? new Date() : existing.releasedAt,
       },

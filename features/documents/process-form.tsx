@@ -5,16 +5,14 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { SubmitButton } from "@/components/submit-button";
-import type { DocumentType, RequestStatus } from "@prisma/client";
+import type { RequestStatus } from "@prisma/client";
 
 export function ProcessForm({
   id,
   status,
-  type,
 }: {
   id: string;
   status: RequestStatus;
-  type: DocumentType;
 }) {
   return (
     <div className="space-y-4 rounded-lg border p-4">
@@ -27,15 +25,9 @@ export function ProcessForm({
           </form>
         ) : null}
         {status === "REVIEWING" || status === "PENDING" ? (
-          <form action={updateRequestStatusFormAction} className="space-y-2">
+          <form action={updateRequestStatusFormAction}>
             <input type="hidden" name="id" value={id} />
             <input type="hidden" name="status" value="APPROVED" />
-            {type === "CERTIFICATE_OF_INDIGENCY" ? (
-              <div>
-                <Label htmlFor="indigencyNote">Indigency confirmation</Label>
-                <Textarea id="indigencyNote" name="indigencyNote" required />
-              </div>
-            ) : null}
             <SubmitButton>Approve and issue</SubmitButton>
           </form>
         ) : null}

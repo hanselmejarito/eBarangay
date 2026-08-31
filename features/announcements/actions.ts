@@ -53,14 +53,18 @@ export async function upsertAnnouncementAction(
   const shouldNotify = formData.get("notifyResidents") === "on";
   let notifyNote = "";
   if (shouldNotify) {
-    const already = await announcementHasNotices(row.id);
-    if (!already) {
-      const sent = await notifyResidentsOfAnnouncement({
-        announcementId: row.id,
-        title: row.title,
-        content: row.content,
-      });
-      notifyNote = ` Notified ${sent.total} residents (${sent.email} email, ${sent.sms} mobile).`;
+    try {
+      const already = await announcementHasNotices(row.id);
+      if (!already) {
+        const sent = await notifyResidentsOfAnnouncement({
+          announcementId: row.id,
+        });
+        notifyNote = ` Notified ${sent.total} residents (${sent.email} email, ${sent.sms} mobile).`;
+      }
+    } catch (error) {
+      console.error("Announcement notify failed:", error);
+      notifyNote =
+        " Announcement saved, but notice delivery failed. Apply the latest database migration, then use Notify residents.";
     }
   }
 
@@ -90,16 +94,22 @@ export async function sendAnnouncementNoticesAction(
   if (await announcementHasNotices(announcementId)) {
     return { error: "Residents were already notified for this announcement." };
   }
-  const sent = await notifyResidentsOfAnnouncement({
-    announcementId,
-    title: item.title,
-    content: item.content,
-  });
-  revalidatePath(`/staff/announcements/${announcementId}`);
-  revalidatePath("/portal/notices");
-  return {
-    success: `Notified ${sent.total} residents (${sent.email} email, ${sent.sms} mobile).`,
-  };
+  try {
+    const sent = await notifyResidentsOfAnnouncement({
+      announcementId,
+    });
+    revalidatePath(`/staff/announcements/${announcementId}`);
+    revalidatePath("/portal/notices");
+    return {
+      success: `Notified ${sent.total} residents (${sent.email} email, ${sent.sms} mobile).`,
+    };
+  } catch (error) {
+    console.error("Announcement notify failed:", error);
+    return {
+      error:
+        "Notice delivery failed. Apply the latest database migration, then try Notify residents again.",
+    };
+  }
 }
 
 export async function sendAnnouncementNoticesFormAction(formData: FormData) {
