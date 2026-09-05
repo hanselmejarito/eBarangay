@@ -65,7 +65,7 @@ Seed data uses **Barangay San Roque, Quezon City**. Change this in **Settings** 
 | **Admin** | Seeded, or created by another admin | `/staff/dashboard` |
 
 - Staff can do hall work (residents, documents, complaints, announcements, inventory, budget, reports).
-- Admin can do everything staff can, plus **Users**, **Audit log**, and **Settings**.
+- Admin can do everything staff can, plus **Users** and **Audit log**.
 - Residents cannot open `/staff` routes. Staff cannot open admin-only pages. Wrong-role visits are sent to that role’s home, not to login.
 
 Account statuses: **Pending verification**, **Active**, **Suspended**. Five failed logins lock the account for 15 minutes.
@@ -125,6 +125,7 @@ Registration requires a government ID photo, privacy consent, and household info
 | **Budget** | Year lines and expenses |
 | **Scan ID** | Paste a scanned QR URL or token to open the resident record |
 | **Reports** | Download PDF or CSV by tag |
+| **Settings** | Barangay name, address, officials, logo/seal, fees, certificate validity |
 | **Password** | Change own password |
 
 ### Resident verification
@@ -143,9 +144,8 @@ Queue: `/staff/residents/verify`. Staff check the uploaded ID against the census
 |---|---|
 | **Users** | Create staff/admin, change role/status, reset password |
 | **Audit log** | Who did what (login, register, verify, issue, and similar) |
-| **Settings** | Barangay name, city, province, address, captain/secretary names, logo/seal/signatures, fees, certificate validity days |
 
-Fees and hall names on PDFs and the homepage come from Settings, not from code.
+Fees and hall names on PDFs and the homepage come from **Settings** (staff), not from code.
 
 ---
 

@@ -259,13 +259,13 @@ export const staffNav: Item[] = [
   { href: "/staff/budget", label: "Budget", icon: Wallet },
   { href: "/staff/scan", label: "Scan ID", icon: IdCard },
   { href: "/staff/reports", label: "Reports", icon: ClipboardList },
+  { href: "/staff/settings", label: "Settings", icon: Settings },
   { href: "/staff/password", label: "Password", icon: KeyRound },
 ];
 
 export const adminNav: Item[] = [
   { href: "/staff/users", label: "Users", icon: Shield },
   { href: "/staff/audit", label: "Audit log", icon: Bell },
-  { href: "/staff/settings", label: "Settings", icon: Settings },
 ];
 
 export const portalNav: Item[] = [

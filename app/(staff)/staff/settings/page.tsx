@@ -1,9 +1,9 @@
-import { requireAdmin } from "@/lib/rbac";
+import { requireStaff } from "@/lib/rbac";
 import { getSettings } from "@/lib/settings";
 import { SettingsForm } from "@/features/settings/settings-form";
 
 export default async function SettingsPage() {
-  await requireAdmin();
+  await requireStaff();
   const settings = await getSettings();
   return (
     <div className="space-y-4">

@@ -61,8 +61,8 @@ Open [http://localhost:3000](http://localhost:3000). Full setup, roles, modules,
 ## Roles
 
 - **Resident** — register, request documents for household members, complaints, QR ID after verification
-- **Staff** — verify residents, process requests, complaints, announcements, inventory, budget, reports
-- **Admin** — everything staff can do, plus users, settings, and audit log
+- **Staff** — verify residents, process requests, complaints, announcements, inventory, budget, reports, hall settings
+- **Admin** — everything staff can do, plus users and audit log
 
 Staff accounts are created by an admin. Residents self-register and wait in the verification queue.
 

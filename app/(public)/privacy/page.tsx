@@ -25,8 +25,8 @@ export default function PrivacyPage() {
       <h2 className="mt-8 text-xl font-semibold">Who can see it</h2>
       <p>
         Residents see their own household records. Authorized barangay staff see
-        operational queues. Administrators manage users, settings, and audit
-        logs. Public QR verification shows only a name, verification badge, and
+        operational queues and hall settings. Administrators manage users and
+        audit logs. Public QR verification shows only a name, verification badge, and
         purok — not contact details or identity documents.
       </p>
       <h2 className="mt-8 text-xl font-semibold">Retention and rights</h2>

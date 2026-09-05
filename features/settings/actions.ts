@@ -5,14 +5,14 @@ import { prisma } from "@/lib/prisma";
 import { writeAudit } from "@/lib/audit";
 import { saveUpload } from "@/lib/files";
 import { settingsSchema } from "@/lib/validations";
-import { requireAdmin } from "@/lib/rbac";
+import { requireStaff } from "@/lib/rbac";
 import type { ActionState } from "@/features/auth/actions";
 
 export async function updateSettingsAction(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const admin = await requireAdmin();
+  const staff = await requireStaff();
   const parsed = settingsSchema.safeParse({
     barangayName: formData.get("barangayName"),
     cityMunicipality: formData.get("cityMunicipality"),
@@ -57,7 +57,7 @@ export async function updateSettingsAction(
   });
 
   await writeAudit({
-    actorId: admin.id,
+    actorId: staff.id,
     action: "UPDATE_SETTINGS",
     entityType: "Settings",
     entityId: "default",
