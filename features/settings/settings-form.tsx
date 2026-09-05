@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { updateSettingsAction } from "@/features/settings/actions";
+import { ImageField } from "@/components/image-field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FormMessage } from "@/components/form-message";
@@ -20,6 +21,10 @@ type Defaults = {
   indigencyFee: number;
   businessClearanceFee: number;
   certificateValidityDays: number;
+  logoUrl: string | null;
+  sealUrl: string | null;
+  captainSignatureUrl: string | null;
+  secretarySignatureUrl: string | null;
 };
 
 export function SettingsForm({ defaults }: { defaults: Defaults }) {
@@ -58,10 +63,30 @@ export function SettingsForm({ defaults }: { defaults: Defaults }) {
         label="Validity (days)"
         defaultValue={defaults.certificateValidityDays}
       />
-      <FileField name="logo" label="Logo" />
-      <FileField name="seal" label="Official seal" />
-      <FileField name="captainSignature" label="Captain signature" />
-      <FileField name="secretarySignature" label="Secretary signature" />
+      <ImageField
+        name="logo"
+        label="Logo"
+        existingUrl={defaults.logoUrl}
+        previewClassName="h-28 w-28 rounded-lg border bg-white object-contain p-1"
+      />
+      <ImageField
+        name="seal"
+        label="Official seal"
+        existingUrl={defaults.sealUrl}
+        previewClassName="h-28 w-28 rounded-lg border bg-white object-contain p-1"
+      />
+      <ImageField
+        name="captainSignature"
+        label="Captain signature"
+        existingUrl={defaults.captainSignatureUrl}
+        previewClassName="h-20 w-full max-w-xs rounded-lg border bg-white object-contain p-2"
+      />
+      <ImageField
+        name="secretarySignature"
+        label="Secretary signature"
+        existingUrl={defaults.secretarySignatureUrl}
+        previewClassName="h-20 w-full max-w-xs rounded-lg border bg-white object-contain p-2"
+      />
       <div className="md:col-span-2">
         <SubmitButton>Save settings</SubmitButton>
       </div>
@@ -86,11 +111,3 @@ function Field({
   );
 }
 
-function FileField({ name, label }: { name: string; label: string }) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={name}>{label}</Label>
-      <Input id={name} name={name} type="file" accept="image/*" />
-    </div>
-  );
-}

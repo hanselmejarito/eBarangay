@@ -1,4 +1,5 @@
 import { requireStaff } from "@/lib/rbac";
+import { fileUrl } from "@/lib/files";
 import { getSettings } from "@/lib/settings";
 import { SettingsForm } from "@/features/settings/settings-form";
 
@@ -22,6 +23,10 @@ export default async function SettingsPage() {
           indigencyFee: Number(settings.indigencyFee),
           businessClearanceFee: Number(settings.businessClearanceFee),
           certificateValidityDays: settings.certificateValidityDays,
+          logoUrl: fileUrl(settings.logoPath),
+          sealUrl: fileUrl(settings.sealPath),
+          captainSignatureUrl: fileUrl(settings.captainSignaturePath),
+          secretarySignatureUrl: fileUrl(settings.secretarySignaturePath),
         }}
       />
     </div>

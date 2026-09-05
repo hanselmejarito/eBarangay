@@ -12,6 +12,7 @@ export function ImageField({
   multiple,
   existingUrl,
   existingUrls,
+  previewClassName = "h-28 w-28 rounded-lg border object-cover",
 }: {
   name: string;
   label: string;
@@ -20,6 +21,7 @@ export function ImageField({
   multiple?: boolean;
   existingUrl?: string | null;
   existingUrls?: string[];
+  previewClassName?: string;
 }) {
   const [previews, setPreviews] = useState<string[]>([]);
 
@@ -44,7 +46,7 @@ export function ImageField({
               <img
                 src={url}
                 alt=""
-                className="h-28 w-28 rounded-lg border object-cover"
+                className={previewClassName}
               />
             </a>
           ))}
@@ -58,7 +60,7 @@ export function ImageField({
               key={url}
               src={url}
               alt="Selected preview"
-              className="h-28 w-28 rounded-lg border object-cover"
+              className={previewClassName}
             />
           ))}
         </div>
