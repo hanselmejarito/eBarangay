@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { Landmark } from "lucide-react";
+import { BarangayLogo } from "@/components/barangay-logo";
 import { Button } from "@/components/ui/button";
 import { getSessionUser } from "@/lib/rbac";
 import { ROLE_HOME } from "@/lib/constants";
+import { fileUrl } from "@/lib/files";
 import { getSettings } from "@/lib/settings";
 import { PublicMobileNav } from "@/components/layout/public-mobile-nav";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -20,22 +22,27 @@ export async function PublicHeader() {
     getSessionUser(),
     getSettings().catch(() => null),
   ]);
+  const barangayName = settings?.barangayName ?? "eBarangay";
 
   return (
     <header className="sticky top-0 z-30 border-b border-white/10 bg-background/75 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-3 sm:px-4">
-        <PublicMobileNav
-          homeHref="/"
-          homeLabel={settings?.barangayName ?? "eBarangay"}
-        />
+        <PublicMobileNav homeHref="/" homeLabel={barangayName} />
         <Link
           href="/"
           className="flex min-w-0 flex-1 items-center gap-2.5 font-semibold tracking-tight text-primary md:flex-none"
         >
-          <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground">
-            <Landmark className="size-4" />
-          </span>
-          <span className="truncate">{settings?.barangayName ?? "eBarangay"}</span>
+          <BarangayLogo
+            src={fileUrl(settings?.logoPath)}
+            barangayName={barangayName}
+            className="size-9"
+            placeholder={
+              <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground">
+                <Landmark className="size-4" />
+              </span>
+            }
+          />
+          <span className="truncate">{barangayName}</span>
         </Link>
         <nav className="hidden items-center gap-1 text-sm text-muted-foreground md:flex">
           {LINKS.map((link) => (

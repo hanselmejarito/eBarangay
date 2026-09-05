@@ -1,5 +1,6 @@
 import { getSettings } from "@/lib/settings";
 import Link from "next/link";
+import { BagongPilipinasLogo } from "@/components/bagong-pilipinas-logo";
 
 export async function PublicFooter() {
   const settings = await getSettings().catch(() => null);
@@ -7,13 +8,17 @@ export async function PublicFooter() {
     <footer className="mt-auto border-t bg-card">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 text-sm text-muted-foreground md:grid-cols-3">
         <div>
-          <p className="font-semibold tracking-tight text-foreground">
+          <p className="text-xs font-medium uppercase tracking-[0.16em]">
+            Republic of the Philippines
+          </p>
+          <p className="mt-1 font-semibold tracking-tight text-foreground">
             {settings?.barangayName ?? "eBarangay"}
           </p>
           <p className="mt-1">
             {settings?.cityMunicipality ?? "Local Government"}
             {settings?.province ? ` · ${settings.province}` : ""}
           </p>
+          <BagongPilipinasLogo height={96} tone="auto" className="-ml-2 mt-4" />
         </div>
         <div className="space-y-1">
           <p className="font-medium text-foreground">Legal</p>

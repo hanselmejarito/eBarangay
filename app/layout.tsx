@@ -23,6 +23,10 @@ export const metadata: Metadata = {
     "Barangay one-stop digital services: resident registry, certificates, complaints, and announcements.",
   authors: [{ name: "Hansel Mejarito Jr." }],
   creator: "Hansel Mejarito Jr.",
+  icons: {
+    icon: [{ url: "/icon", type: "image/png" }],
+    apple: [{ url: "/apple-icon", type: "image/png" }],
+  },
 };
 
 export const viewport = {

@@ -26,6 +26,7 @@ import {
   KeyRound,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BarangayLogo } from "@/components/barangay-logo";
 import { logoutAction } from "@/features/auth/actions";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -52,12 +53,27 @@ function isActiveNav(pathname: string, href: string, allHrefs: string[]) {
   return best === href;
 }
 
-function SidebarBrand({ title, subtitle }: { title: string; subtitle?: string }) {
+function SidebarBrand({
+  title,
+  subtitle,
+  logoUrl,
+}: {
+  title: string;
+  subtitle?: string;
+  logoUrl?: string | null;
+}) {
   return (
     <div className="flex items-center gap-3 px-4 py-5">
-      <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-ph-gold text-sidebar">
-        <Landmark className="size-5" />
-      </div>
+      <BarangayLogo
+        src={logoUrl ?? null}
+        barangayName={title}
+        className="size-11"
+        placeholder={
+          <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-ph-gold text-sidebar">
+            <Landmark className="size-5" />
+          </div>
+        }
+      />
       <div className="min-w-0">
         <p className="truncate text-sm font-semibold leading-tight tracking-tight">{title}</p>
         {subtitle ? (
@@ -165,15 +181,17 @@ export function AppSidebar({
   subtitle,
   items,
   extra,
+  logoUrl,
 }: {
   title: string;
   subtitle?: string;
   items: Item[];
   extra?: Item[];
+  logoUrl?: string | null;
 }) {
   return (
     <aside className="sticky top-0 hidden h-svh w-64 shrink-0 flex-col bg-sidebar text-sidebar-foreground md:flex">
-      <SidebarBrand title={title} subtitle={subtitle} />
+      <SidebarBrand title={title} subtitle={subtitle} logoUrl={logoUrl} />
       <SidebarLinks items={items} extra={extra} />
       <SidebarFooter />
     </aside>
@@ -186,12 +204,14 @@ export function AppMobileNav({
   items,
   extra,
   triggerClassName,
+  logoUrl,
 }: {
   title: string;
   subtitle?: string;
   items: Item[];
   extra?: Item[];
   triggerClassName?: string;
+  logoUrl?: string | null;
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -217,7 +237,7 @@ export function AppMobileNav({
           <SheetTitle>Menu</SheetTitle>
         </SheetHeader>
         <div className="flex h-full flex-col">
-          <SidebarBrand title={title} subtitle={subtitle} />
+          <SidebarBrand title={title} subtitle={subtitle} logoUrl={logoUrl} />
           <SidebarLinks items={items} extra={extra} onNavigate={() => setOpen(false)} />
           <SidebarFooter />
         </div>

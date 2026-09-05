@@ -1,5 +1,10 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import type { DocumentType } from "@prisma/client";
+import {
+  drawLogo,
+  embedBagongPilipinas,
+  embedBarangayLogo,
+} from "@/lib/brand-assets";
 import { DOCUMENT_LABELS, formatResidentName } from "@/lib/constants";
 import { absUrl } from "@/lib/qr";
 import { formatManilaDate } from "@/lib/datetime";
@@ -32,6 +37,7 @@ type CertificateInput = {
     address: string;
     captainName: string;
     secretaryName: string;
+    logoPath?: string | null;
   };
 };
 
@@ -79,6 +85,17 @@ export async function buildCertificatePdf(input: CertificateInput) {
     borderColor: rgb(0.83, 0.65, 0.18),
     borderWidth: 1,
   });
+
+  const [bagongPilipinas, barangaySeal] = await Promise.all([
+    embedBagongPilipinas(doc),
+    embedBarangayLogo(doc, input.settings.logoPath),
+  ]);
+  if (bagongPilipinas) {
+    drawLogo(page, bagongPilipinas, { right: 560, top: 747, height: 72 });
+  }
+  if (barangaySeal) {
+    drawLogo(page, barangaySeal, { left: 52, top: 747, height: 72 });
+  }
 
   let y = 720;
   const center = (text: string, size: number, f = font, color = ink) => {

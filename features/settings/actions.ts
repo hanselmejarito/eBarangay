@@ -64,5 +64,8 @@ export async function updateSettingsAction(
   });
   revalidatePath("/staff/settings");
   revalidatePath("/");
+  revalidatePath("/icon");
+  revalidatePath("/apple-icon");
+  revalidatePath("/favicon.ico");
   return { success: "Settings saved." };
 }

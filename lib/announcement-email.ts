@@ -26,6 +26,15 @@ function bodyHtml(content: string) {
     .join("");
 }
 
+/** Served from the same origin the email already links to. */
+function bagongPilipinasUrl(viewUrl: string) {
+  try {
+    return new URL("/bagong-pilipinas.png", viewUrl).toString();
+  } catch {
+    return null;
+  }
+}
+
 function priorityStyle(priority: string) {
   if (priority === "URGENT") {
     return { label: "Urgent", bg: "#CE1126", fg: "#ffffff" };
@@ -89,6 +98,7 @@ export function announcementEmailText(input: AnnouncementEmailInput) {
 
 export function announcementEmailHtml(input: AnnouncementEmailInput) {
   const badge = priorityStyle(input.priority);
+  const logoUrl = bagongPilipinasUrl(input.viewUrl);
   const posted = formatWhen(input.publishedAt);
   const until = formatWhen(input.expiresAt);
   const contact = input.contactNumber
@@ -125,6 +135,11 @@ export function announcementEmailHtml(input: AnnouncementEmailInput) {
             </tr>
             <tr>
               <td style="padding:28px 32px 16px;text-align:center;">
+                ${
+                  logoUrl
+                    ? `<img src="${escapeHtml(logoUrl)}" width="88" height="82" alt="Bagong Pilipinas" style="display:block;margin:0 auto 14px;border:0;" />`
+                    : ""
+                }
                 <p style="margin:0 0 6px;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#5c6570;font-family:Arial,Helvetica,sans-serif;">
                   Republic of the Philippines
                 </p>

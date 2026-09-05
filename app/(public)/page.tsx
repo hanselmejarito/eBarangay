@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { ArrowRight, FileText, IdCard, Megaphone, ShieldCheck, Trophy } from "lucide-react";
+import { BagongPilipinasLogo } from "@/components/bagong-pilipinas-logo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -63,6 +64,7 @@ export default async function HomePage() {
         <div className="pointer-events-none absolute -right-16 bottom-0 size-80 rounded-full bg-white/10 blur-3xl" />
         <div className="relative mx-auto grid max-w-6xl gap-10 px-4 py-16 md:grid-cols-2 md:items-center md:py-24">
           <div>
+            <BagongPilipinasLogo height={96} tone="dark" className="-ml-2 mb-5" />
             <p className="inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-ph-gold">
               Republic of the Philippines
             </p>

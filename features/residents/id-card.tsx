@@ -1,5 +1,7 @@
 "use client";
 
+import { BagongPilipinasLogo } from "@/components/bagong-pilipinas-logo";
+
 export function ResidentIdCard({
   name,
   barangay,
@@ -23,6 +25,9 @@ export function ResidentIdCard({
           <div className="flex-1 bg-ph-blue" />
           <div className="w-8 bg-ph-gold" />
           <div className="flex-1 bg-ph-red" />
+        </div>
+        <div className="flex justify-center">
+          <BagongPilipinasLogo height={88} />
         </div>
         <p className="text-center text-xs uppercase tracking-widest text-ph-blue">
           {barangay}

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Sample seal for the demo barangay (Barangay San Roque, Quezon City).
+  The ring inscriptions are laid out glyph by glyph on purpose: <textPath> is
+  unsupported by several rasterisers, and fixed glyph positions keep the seal
+  from reflowing when a viewer substitutes the serif.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Seal of Barangay San Roque">
+  <title>Seal of Barangay San Roque</title>
+  <defs>
+    <path id="star" d="M0,-10 L2.246,-3.09 L9.511,-3.09 L3.633,1.18 L5.878,8.09 L0,3.82 L-5.878,8.09 L-3.633,1.18 L-9.511,-3.09 L-2.246,-3.09 Z" />
+    <path id="ray" d="M0,-88 L-12,-46 L12,-46 Z" />
+  </defs>
+
+  <circle cx="256" cy="256" r="252" fill="#0038A8" />
+  <circle cx="256" cy="256" r="245" fill="none" stroke="#FCD116" stroke-width="2.5" />
+  <circle cx="256" cy="256" r="208" fill="none" stroke="#FCD116" stroke-width="2.5" />
+  <circle cx="256" cy="256" r="204" fill="#FFFDF5" />
+
+  <g fill="#FFFFFF" font-family="Georgia, 'Times New Roman', Times, serif" font-weight="bold" text-anchor="middle" font-size="34">
+      <text x="70.58" y="153.22" transform="rotate(-61.00 70.58 153.22)">B</text>
+      <text x="85.50" y="130.01" transform="rotate(-53.54 85.50 130.01)">A</text>
+      <text x="103.96" y="108.26" transform="rotate(-45.82 103.96 108.26)">R</text>
+      <text x="125.17" y="89.19" transform="rotate(-38.11 125.17 89.19)">A</text>
+      <text x="148.75" y="73.13" transform="rotate(-30.39 148.75 73.13)">N</text>
+      <text x="175.15" y="60.02" transform="rotate(-22.42 175.15 60.02)">G</text>
+      <text x="203.11" y="50.70" transform="rotate(-14.45 203.11 50.70)">A</text>
+      <text x="231.15" y="45.46" transform="rotate(-6.73 231.15 45.46)">Y</text>
+      <text x="269.31" y="44.42" transform="rotate(3.60 269.31 44.42)">S</text>
+      <text x="294.83" y="47.59" transform="rotate(10.55 294.83 47.59)">A</text>
+      <text x="322.46" y="54.69" transform="rotate(18.27 322.46 54.69)">N</text>
+      <text x="359.95" y="71.23" transform="rotate(29.36 359.95 71.23)">R</text>
+      <text x="384.57" y="87.44" transform="rotate(37.34 384.57 87.44)">O</text>
+      <text x="407.38" y="107.58" transform="rotate(45.57 407.38 107.58)">Q</text>
+      <text x="426.50" y="130.01" transform="rotate(53.54 426.50 130.01)">U</text>
+      <text x="441.42" y="153.22" transform="rotate(61.00 441.42 153.22)">E</text>
+  </g>
+  <g fill="#FFFFFF" font-family="Georgia, 'Times New Roman', Times, serif" font-weight="bold" text-anchor="middle" font-size="25">
+      <text x="63.46" y="405.88" transform="rotate(52.10 63.46 405.88)">Q</text>
+      <text x="77.23" y="422.06" transform="rotate(47.11 77.23 422.06)">U</text>
+      <text x="91.32" y="436.05" transform="rotate(42.45 91.32 436.05)">E</text>
+      <text x="105.97" y="448.42" transform="rotate(37.94 105.97 448.42)">Z</text>
+      <text x="122.70" y="460.37" transform="rotate(33.12 122.70 460.37)">O</text>
+      <text x="140.98" y="471.19" transform="rotate(28.13 140.98 471.19)">N</text>
+      <text x="167.58" y="483.42" transform="rotate(21.25 167.58 483.42)">C</text>
+      <text x="183.05" y="488.84" transform="rotate(17.40 183.05 488.84)">I</text>
+      <text x="198.17" y="493.05" transform="rotate(13.71 198.17 493.05)">T</text>
+      <text x="217.63" y="496.96" transform="rotate(9.05 217.63 496.96)">Y</text>
+      <text x="240.88" y="499.53" transform="rotate(3.55 240.88 499.53)">·</text>
+      <text x="267.05" y="499.75" transform="rotate(-2.59 267.05 499.75)">M</text>
+      <text x="289.58" y="497.68" transform="rotate(-7.91 289.58 497.68)">E</text>
+      <text x="308.45" y="494.30" transform="rotate(-12.41 308.45 494.30)">T</text>
+      <text x="327.65" y="489.24" transform="rotate(-17.08 327.65 489.24)">R</text>
+      <text x="347.67" y="482.13" transform="rotate(-22.07 347.67 482.13)">O</text>
+      <text x="377.13" y="467.81" transform="rotate(-29.76 377.13 467.81)">M</text>
+      <text x="396.79" y="455.28" transform="rotate(-35.24 396.79 455.28)">A</text>
+      <text x="413.06" y="442.73" transform="rotate(-40.07 413.06 442.73)">N</text>
+      <text x="425.23" y="431.77" transform="rotate(-43.91 425.23 431.77)">I</text>
+      <text x="436.19" y="420.53" transform="rotate(-47.60 436.19 420.53)">L</text>
+      <text x="448.97" y="405.33" transform="rotate(-52.26 448.97 405.33)">A</text>
+  </g>
+
+  <g fill="#FCD116">
+    <use href="#star" transform="translate(26 256) scale(0.8)" />
+    <use href="#star" transform="translate(486 256) scale(0.8)" />
+  </g>
+
+  <g fill="#FCD116">
+    <use href="#star" transform="translate(256 92) scale(1.2)" />
+    <use href="#star" transform="translate(174 114) scale(1)" />
+    <use href="#star" transform="translate(338 114) scale(1)" />
+  </g>
+
+  <g transform="translate(256 210)" fill="#FCD116">
+    <g transform="rotate(22.5)"><use href="#ray" /></g>
+    <g transform="rotate(67.5)"><use href="#ray" /></g>
+    <g transform="rotate(112.5)"><use href="#ray" /></g>
+    <g transform="rotate(157.5)"><use href="#ray" /></g>
+    <g transform="rotate(202.5)"><use href="#ray" /></g>
+    <g transform="rotate(247.5)"><use href="#ray" /></g>
+    <g transform="rotate(292.5)"><use href="#ray" /></g>
+    <g transform="rotate(337.5)"><use href="#ray" /></g>
+    <circle cx="0" cy="0" r="40" fill="#FCD116" />
+  </g>
+
+  <g>
+    <path d="M188 302 L256 262 L324 302 Z" fill="#CE1126" />
+    <rect x="200" y="302" width="112" height="52" fill="#0038A8" />
+    <rect x="248" y="324" width="16" height="30" fill="#FFFDF5" />
+    <rect x="216" y="315" width="15" height="15" fill="#FFFDF5" />
+    <rect x="281" y="315" width="15" height="15" fill="#FFFDF5" />
+    <rect x="192" y="354" width="128" height="7" fill="#06214F" />
+  </g>
+
+  <rect x="200" y="376" width="112" height="2.5" fill="#FCD116" />
+  <text x="256" y="406" text-anchor="middle" font-family="Georgia, 'Times New Roman', Times, serif" font-size="23" font-weight="bold" letter-spacing="4" fill="#06214F">EST. 1975</text>
+</svg>

@@ -1,4 +1,5 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import { drawLogo, embedBagongPilipinas } from "@/lib/brand-assets";
 import { formatResidentName } from "@/lib/constants";
 import { formatManilaDateTime } from "@/lib/datetime";
 
@@ -43,6 +44,11 @@ export async function buildResidentReportPdf({
     page = doc.addPage([612, 792]);
     y = 750;
   };
+
+  const bagongPilipinas = await embedBagongPilipinas(doc);
+  if (bagongPilipinas) {
+    drawLogo(page, bagongPilipinas, { right: 564, top: 762, height: 48 });
+  }
 
   page.drawText(barangayName, { x: 48, y, size: 14, font: bold, color: ink });
   y -= 16;

@@ -1,7 +1,22 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { saveBuffer } from "../lib/files";
 
 const prisma = new PrismaClient();
+
+/** Puts the sample seal through the same upload pipeline the admin form uses. */
+async function seedBarangayLogo() {
+  try {
+    const png = await readFile(
+      path.join(process.cwd(), "public", "demo", "barangay-san-roque-seal.png"),
+    );
+    return await saveBuffer(png, "settings", "png");
+  } catch {
+    return null;
+  }
+}
 
 async function main() {
   await prisma.auditLog.deleteMany();
@@ -37,6 +52,7 @@ async function main() {
       indigencyFee: 0,
       businessClearanceFee: 300,
       certificateValidityDays: 180,
+      logoPath: await seedBarangayLogo(),
     },
   });
 

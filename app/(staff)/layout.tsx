@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { adminNav, AppMobileNav, AppSidebar, staffNav } from "@/components/layout/app-sidebar";
+import { fileUrl } from "@/lib/files";
 import { requireStaff } from "@/lib/rbac";
 import { getSettings } from "@/lib/settings";
 
@@ -22,6 +23,7 @@ export default async function StaffLayout({
         subtitle={subtitle}
         items={staffNav}
         extra={extra}
+        logoUrl={fileUrl(settings.logoPath)}
       />
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b bg-background/95 px-3 backdrop-blur md:hidden">
@@ -30,6 +32,7 @@ export default async function StaffLayout({
             subtitle={subtitle}
             items={staffNav}
             extra={extra}
+            logoUrl={fileUrl(settings.logoPath)}
           />
           <p className="min-w-0 flex-1 truncate text-sm font-semibold md:hidden">
             {settings.barangayName}
